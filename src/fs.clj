@@ -45,9 +45,6 @@
 (defn size [path]
   (.length (File. path)))
 
-(defn listdir [path]
-  (.list (File. path)))
-
 (defn mkdir [path]
   (.mkdir (File. path)))
 
@@ -71,13 +68,17 @@
    (.getAbsolutePath (File/createTempFile prefix suffix (File. directory)))))
 
 (defn tempdir
-  ([] (let [dir (File/createTempFile "-fs-" "")]
+  ([] (let [dir (File/createTempFile "-fs-" "")
+            path (.getAbsolutePath dir)]
         (.delete dir)
-        (.mkdir dir)))
+        (.mkdir dir)
+        path))
   ([root]
-   (let [dir (File/createTempFile "-fs-" "" (File. root))]
+   (let [dir (File/createTempFile "-fs-" "" (File. root))
+         path (.getAbsolutePath dir)]
      (.delete dir)
-     (.mkdir dir))))
+     (.mkdir dir)
+     path)))
 
 (defn cwd []
   (abspath "."))
