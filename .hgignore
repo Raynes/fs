@@ -3,3 +3,4 @@ syntax glob
 lib
 classes
 pom.xml
+README.html
