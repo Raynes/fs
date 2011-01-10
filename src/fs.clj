@@ -1,14 +1,18 @@
 (ns ^{:doc "File system utilities in Clojure"
       :author "Miki Tebeka <miki.tebeka@gmail.com>"}
   fs
+  (:require [clojure.zip :as zip])
   (:import java.io.File))
 
 (def separator File/separator)
 
+(defn- strinfify [file]
+  (.getCanonicalPath file))
+
 (defn listdir
   "List files under path."
   [path]
-  (seq (.list (File. path))))
+  (map strinfify (seq (.list (File. path)))))
 
 (defn executable?
   "Return true if path is executable."
@@ -43,7 +47,7 @@
 (defn normpath
   "Return nomralized (canonical) path."
   [path]
-  (.getCanonicalPath (File. path)))
+  (strinfify (File. path)))
 
 (defn basename
   "Return basename (file part) of path.\n\t(basename \"/a/b/c\") -> \"c\""
@@ -127,5 +131,25 @@
   []
   (abspath "."))
 
-; FIXME: ...
-;(defn dir-seq [root]
+; walk helper functions
+(defn- w-directory? [f]
+  (.isDirectory f))
+(defn- w-file? [f]
+  (.isFile f))
+(defn- w-children [f]
+  (.listFiles f))
+(defn- w-base [f]
+  (.getName f))
+
+(defn walk [path func]
+  "Walk over directory structure. Calls 'func' with [root dirs files]"
+  (loop [loc (zip/zipper w-directory? w-children nil (File. path))]
+    (when (not (zip/end? loc))
+      (let [file (zip/node loc)]
+        (if (w-file? file)
+          (recur (zip/next loc))
+          (let [kids (w-children file)
+                dirs (map w-base (filter w-directory? kids))
+                files (map w-base (filter w-file? kids))]
+            (func (strinfify file) dirs files)
+            (recur (zip/next loc))))))))
