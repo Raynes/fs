@@ -56,6 +56,8 @@ tempdir
     Create temporary directory
 cwd
     Return the current working directory
+walk
+    Walk over directory structure, calling function on every step
 
 License
 =======
