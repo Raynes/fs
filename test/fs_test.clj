@@ -88,3 +88,26 @@
 ; FIXME: This test sucks
 (deftest cwd-test
   (is (> (count (cwd)) 3)))
+
+(defn create-walk-dir []
+  (let [root (tempdir)]
+    (mkdir (join root "a"))
+    (mkdir (join root "b"))
+    (spit (join root "1") "1")
+    (spit (join root "a" "2") "1")
+    (spit (join root "b" "3") "1")
+    root))
+
+(def walk-atom (atom #{}))
+
+(defn walk-fn [root dirs files]
+  (swap! walk-atom conj [root dirs files]))
+
+(deftest walk-test
+ (let [root (create-walk-dir)]
+   (walk root walk-fn)
+   (let [result @walk-atom]
+     (is (= result
+            #{[root #{"b" "a"} #{"1"}]
+              [(join root "a") #{} #{"2"}]
+              [(join root "b") #{} #{"3"}]})))))

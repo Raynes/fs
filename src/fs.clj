@@ -6,13 +6,10 @@
 
 (def separator File/separator)
 
-(defn- strinfify [file]
-  (.getCanonicalPath file))
-
 (defn listdir
   "List files under path."
   [path]
-  (map strinfify (seq (.list (File. path)))))
+  (seq (.list (File. path))))
 
 (defn executable?
   "Return true if path is executable."
@@ -43,6 +40,9 @@
   "Return absolute path."
   [path]
   (.getAbsolutePath (File. path)))
+
+(defn- strinfify [file]
+  (.getCanonicalPath file))
 
 (defn normpath
   "Return nomralized (canonical) path."
@@ -141,6 +141,7 @@
 (defn- w-base [f]
   (.getName f))
 
+; FIXME: I'm sure the Clojure gurus out there will make this a 1 liner :)
 (defn walk [path func]
   "Walk over directory structure. Calls 'func' with [root dirs files]"
   (loop [loc (zip/zipper w-directory? w-children nil (File. path))]
@@ -149,7 +150,7 @@
         (if (w-file? file)
           (recur (zip/next loc))
           (let [kids (w-children file)
-                dirs (map w-base (filter w-directory? kids))
-                files (map w-base (filter w-file? kids))]
+                dirs (set (map w-base (filter w-directory? kids)))
+                files (set (map w-base (filter w-file? kids)))]
             (func (strinfify file) dirs files)
             (recur (zip/next loc))))))))
