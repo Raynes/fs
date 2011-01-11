@@ -131,6 +131,9 @@
   []
   (abspath "."))
 
+; FIXME:
+;(defn glob [pattern]
+
 ; walk helper functions
 (defn- w-directory? [f]
   (.isDirectory f))

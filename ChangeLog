@@ -1,3 +1,7 @@
+2011-01-11 version 0.1.2
+    * Fixed a bug in list
+    * Added test to walk
+
 2011-01-10 version 0.1.1
     * Added "walk"
 
