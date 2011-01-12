@@ -111,3 +111,12 @@
             #{[root #{"b" "a"} #{"1"}]
               [(join root "a") #{} #{"2"}]
               [(join root "b") #{} #{"3"}]})))))
+
+(deftest copy-test
+  (let [from (tempfile)
+        to (tempfile)
+        data "What's up Doc?"]
+    (delete to)
+    (spit from data)
+    (copy from to)
+    (is (= (slurp from) (slurp to)))))
