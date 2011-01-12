@@ -34,6 +34,9 @@
   [path]
   (.delete (File. path)))
 
+; FIXME: Write this
+;(defn rmtree [root] ...)
+
 (defn exists?
   "Return true if path exists."
   [path]
@@ -114,6 +117,9 @@
     (with-open [to-channel (.getChannel (FileOutputStream. to))
                 from-channel (.getChannel (FileInputStream. from))]
       (.transferFrom to-channel from-channel 0 (.size from-channel)))))
+
+; FIXME: Write this
+; (defn copytree [from to] ...
 
 (defn tempfile 
   "Create a temporary file."
