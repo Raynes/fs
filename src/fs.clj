@@ -166,6 +166,7 @@
          :else (recur (next stream) (str re c) curly-depth)))))
 
 (defn glob [pattern]
+  "Returns files matching glob pattern."
   (let [parts (split pattern)
         root (if (= (count parts) 1) "." (apply join (butlast parts)))
         regex (glob->regex (last parts))]
