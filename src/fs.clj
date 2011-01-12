@@ -2,7 +2,9 @@
       :author "Miki Tebeka <miki.tebeka@gmail.com>"}
   fs
   (:require [clojure.zip :as zip])
-  (:import java.io.File))
+  (:import java.io.File
+           java.io.FileInputStream
+           java.io.FileOutputStream))
 
 (def separator File/separator)
 
@@ -103,6 +105,14 @@
   "Rename old-path to new-path."
   [old-path new-path]
   (.renameTo (File. old-path) (File. new-path)))
+
+(defn copy [from to]
+  (let [from (File. from)
+        to (File. to)]
+    (when (not (.exists to)) (.createNewFile to))
+    (with-open [to-channel (.getChannel (FileOutputStream. to))
+                from-channel (.getChannel (FileInputStream. from))]
+      (.transferFrom to-channel from-channel 0 (.size from-channel)))))
 
 (defn tempfile 
   "Create a temporary file."
