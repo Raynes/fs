@@ -4,7 +4,8 @@
   (:require [clojure.zip :as zip])
   (:import java.io.File
            java.io.FileInputStream
-           java.io.FileOutputStream))
+           java.io.FileOutputStream
+           java.io.FilenameFilter))
 
 (def separator File/separator)
 
@@ -141,9 +142,38 @@
   []
   (abspath "."))
 
-; FIXME:
-;(defn glob [pattern]
+; Taken from https://github.com/jkk/clj-glob. (thanks Justin!)
+(defn- glob->regex
+  "Takes a glob-format string and returns a regex."
+  [s]
+  (loop [stream s
+         re ""
+         curly-depth 0]
+    (let [[c j] stream]
+        (cond
+         (nil? c) (re-pattern (str (if (= \. (first s)) "" "(?=[^\\.])") re))
+         (= c \\) (recur (nnext stream) (str re c c) curly-depth)
+         (= c \/) (recur (next stream) (str re (if (= \. j) c "/(?=[^\\.])"))
+                         curly-depth)
+         (= c \*) (recur (next stream) (str re "[^/]*") curly-depth)
+         (= c \?) (recur (next stream) (str re "[^/]") curly-depth)
+         (= c \{) (recur (next stream) (str re \() (inc curly-depth))
+         (= c \}) (recur (next stream) (str re \)) (dec curly-depth))
+         (and (= c \,) (< 0 curly-depth)) (recur (next stream) (str re \|)
+                                                 curly-depth)
+         (#{\. \( \) \| \+ \^ \$ \@ \%} c) (recur (next stream) (str re \\ c)
+                                                  curly-depth)
+         :else (recur (next stream) (str re c) curly-depth)))))
 
+(defn glob [pattern]
+  (let [parts (split pattern)
+        root (if (= (count parts) 1) "." (apply join (butlast parts)))
+        regex (glob->regex (last parts))]
+    (map #(.getPath %) (seq (.listFiles (File. root)
+                                        (reify FilenameFilter
+                                          (accept [_ _ filename]
+                                            (if (re-find regex filename)
+                                              true false))))))))
 ; walk helper functions
 (defn- w-directory? [f]
   (.isDirectory f))
