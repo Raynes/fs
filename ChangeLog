@@ -1,3 +1,7 @@
+2011-01-12 version 0.2.0
+    * copy
+    * glob
+
 2011-01-11 version 0.1.2
     * Fixed a bug in list
     * Added test to walk
