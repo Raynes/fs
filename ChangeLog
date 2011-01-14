@@ -1,3 +1,11 @@
+2011-01-14 version 0.3.0
+    * chmod
+    * Using clojure.java.io
+    * touch bugfix
+
+2011-01-13 version 0.2.1
+    * touch
+
 2011-01-12 version 0.2.0
     * copy
     * glob
