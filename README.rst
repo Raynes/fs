@@ -64,6 +64,8 @@ tempdir
     Create temporary directory
 tempfile 
     Create temporary file
+touch
+    Change file modification time
 walk
     Walk over directory structure, calling function on every step
 writeable?
