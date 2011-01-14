@@ -1,10 +1,9 @@
 (ns ^{:doc "File system utilities in Clojure"
       :author "Miki Tebeka <miki.tebeka@gmail.com>"}
   fs
-  (:require [clojure.zip :as zip])
+  (:require [clojure.zip :as zip]
+            [clojure.java.io :as io])
   (:import java.io.File
-           java.io.FileInputStream
-           java.io.FileOutputStream
            java.io.FilenameFilter))
 
 (def separator File/separator)
@@ -12,27 +11,27 @@
 (defn listdir
   "List files under path."
   [path]
-  (seq (.list (File. path))))
+  (seq (.list (io/as-file path))))
 
 (defn executable?
   "Return true if path is executable."
   [path]
-  (.canExecute (File. path)))
+  (.canExecute (io/as-file path)))
 
 (defn readable?
   "Return true if path is readable."
   [path]
-  (.canRead (File. path)))
+  (.canRead (io/as-file path)))
 
 (defn writeable?
   "Return true if path is writeable."
   [path]
-  (.canWrite (File. path)))
+  (.canWrite (io/as-file path)))
 
 (defn delete
   "Delete path."
   [path]
-  (.delete (File. path)))
+  (.delete (io/as-file path)))
 
 ; FIXME: Write this
 ;(defn rmtree [root] ...)
@@ -40,12 +39,12 @@
 (defn exists?
   "Return true if path exists."
   [path]
-  (.exists (File. path)))
+  (.exists (io/as-file path)))
 
 (defn abspath
   "Return absolute path."
   [path]
-  (.getAbsolutePath (File. path)))
+  (.getAbsolutePath (io/as-file path)))
 
 (defn- strinfify [file]
   (.getCanonicalPath file))
@@ -53,47 +52,47 @@
 (defn normpath
   "Return nomralized (canonical) path."
   [path]
-  (strinfify (File. path)))
+  (strinfify (io/as-file path)))
 
 (defn basename
   "Return basename (file part) of path.\n\t(basename \"/a/b/c\") -> \"c\""
   [path]
-  (.getName (File. path)))
+  (.getName (io/as-file path)))
 
 (defn dirname
   "Return directory name of path.\n\t(dirname \"a/b/c\") -> \"/a/b\""
   [path]
-  (.getParent (File. path)))
+  (.getParent (io/as-file path)))
 
 (defn directory?
   "Return true if path is a directory."
   [path]
-  (.isDirectory (File. path)))
+  (.isDirectory (io/as-file path)))
 
 (defn file?
   "Return true if path is a file."
   [path]
-  (.isFile (File. path)))
+  (.isFile (io/as-file path)))
 
 (defn mtime
   "Return file modification time."
   [path]
-  (.lastModified (File. path)))
+  (.lastModified (io/as-file path)))
 
 (defn size
   "Return size (in bytes) if file."
   [path]
-  (.length (File. path)))
+  (.length (io/as-file path)))
 
 (defn mkdir
   "Create a directory."
   [path]
-  (.mkdir (File. path)))
+  (.mkdir (io/as-file path)))
 
 (defn mkdirs
   "Make directory tree."
   [path]
-  (.mkdirs (File. path)))
+  (.mkdirs (io/as-file path)))
 
 (defn join
   "Join parts of path.\n\t(join [\"a\" \"b\"]) -> \"a/b\""
@@ -108,19 +107,20 @@
 (defn rename
   "Rename old-path to new-path."
   [old-path new-path]
-  (.renameTo (File. old-path) (File. new-path)))
+  (.renameTo (io/as-file old-path) (io/as-file new-path)))
 
 (defn- ensure-file [path]
-  (let [file (File. path)]
+  (let [file (io/as-file path)]
     (when (not (.exists file)) (.createNewFile file))
     file))
 
+(defn- assert-exists [path]
+  (when (not (exists? path))
+    (throw (IllegalArgumentException. (str path " not found")))))
+
 (defn copy [from to]
-  (let [from (File. from)
-        to (ensure-file to)]
-    (with-open [to-channel (.getChannel (FileOutputStream. to))
-                from-channel (.getChannel (FileInputStream. from))]
-      (.transferFrom to-channel from-channel 0 (.size from-channel)))))
+  (assert-exists from)
+  (io/copy (io/as-file from) (io/as-file to)))
 
 ; FIXME: Write this
 ; (defn copytree [from to] ...
@@ -131,7 +131,8 @@
   ([prefix] (tempfile prefix ""))
   ([prefix suffix] (.getAbsolutePath (File/createTempFile prefix suffix)))
   ([prefix suffix directory] 
-   (.getAbsolutePath (File/createTempFile prefix suffix (File. directory)))))
+   (.getAbsolutePath 
+     (File/createTempFile prefix suffix (io/as-file directory)))))
 
 (defn tempdir
   "Create a temporary directory"
@@ -141,7 +142,7 @@
         (.mkdir dir)
         path))
   ([root]
-   (let [dir (File/createTempFile "-fs-" "" (File. root))
+   (let [dir (File/createTempFile "-fs-" "" (io/as-file root))
          path (.getAbsolutePath dir)]
      (.delete dir)
      (.mkdir dir)
@@ -180,7 +181,7 @@
   (let [parts (split pattern)
         root (if (= (count parts) 1) "." (apply join (butlast parts)))
         regex (glob->regex (last parts))]
-    (map #(.getPath %) (seq (.listFiles (File. root)
+    (map #(.getPath %) (seq (.listFiles (io/as-file root)
                                         (reify FilenameFilter
                                           (accept [_ _ filename]
                                             (if (re-find regex filename)
@@ -198,7 +199,7 @@
 ; FIXME: I'm sure the Clojure gurus out there will make this a 1 liner :)
 (defn walk [path func]
   "Walk over directory structure. Calls 'func' with [root dirs files]"
-  (loop [loc (zip/zipper w-directory? w-children nil (File. path))]
+  (loop [loc (zip/zipper w-directory? w-children nil (io/as-file path))]
     (when (not (zip/end? loc))
       (let [file (zip/node loc)]
         (if (w-file? file)
@@ -224,11 +225,11 @@
   Examples:
   (chmod \"+x\" \"/tmp/foo\") -> Sets executable for everyone
   (chmod \"u-wx\" \"/tmp/foo\") -> Unsets owner write and executable"
-  (when (not (exists? path)) (throw (IllegalArgumentException. "Not found")))
+  (assert-exists path)
   (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
     (when (nil? op) (throw (IllegalArgumentException. "Bad mode")))
     (let [perm-set (set permissions)
-          file (File. path)
+          file (io/as-file path)
           flag (= op "+")
           user (not (empty? u))]
       (when (perm-set \r) (.setReadable file flag user))
