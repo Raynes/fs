@@ -204,3 +204,8 @@
                 files (set (map w-base (filter w-file? kids)))]
             (func (strinfify file) dirs files)
             (recur (zip/next loc))))))))
+
+(defn touch [path & time]
+  "Set file modification time (default to now)"
+  (let [file (File. path)]
+    (.setLastModified file (if time time (System/currentTimeMillis)))))
