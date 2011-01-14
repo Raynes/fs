@@ -212,7 +212,7 @@
 (defn touch [path & time]
   "Set file modification time (default to now)"
   (let [file (ensure-file path)]
-    (.setLastModified file (if time time (System/currentTimeMillis)))))
+    (.setLastModified file (if time (first time) (System/currentTimeMillis)))))
 
 (defn chmod [mode path]
   "Change file permissions.

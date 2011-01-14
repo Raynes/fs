@@ -126,7 +126,10 @@
           t (mtime f)]
       (Thread/sleep 1000)
       (touch f)
-      (is (> (mtime f) t))))
+      (is (> (mtime f) t))
+      (let [t1 3000]
+        (touch f t1)
+        (is (= (mtime f) t1)))))
 
 (deftest test-chmod
   (let [f (tempfile)]
