@@ -20,6 +20,8 @@ abspath
     Return absolute path
 basename
     Return the last part of path
+chmod
+    Set/unset permission on path
 copy
     Copy a file
 cwd
