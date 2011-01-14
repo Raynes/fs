@@ -120,3 +120,10 @@
     (spit from data)
     (copy from to)
     (is (= (slurp from) (slurp to)))))
+
+(deftest touch-test
+    (let [f (tempfile)
+          t (mtime f)]
+      (Thread/sleep 1000)
+      (touch f)
+      (is (> (mtime f) t))))
