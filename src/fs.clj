@@ -110,10 +110,14 @@
   [old-path new-path]
   (.renameTo (File. old-path) (File. new-path)))
 
+(defn- ensure-file [path]
+  (let [file (File. path)]
+    (when (not (.exists file)) (.createNewFile file))
+    file))
+
 (defn copy [from to]
   (let [from (File. from)
-        to (File. to)]
-    (when (not (.exists to)) (.createNewFile to))
+        to (ensure-file to)]
     (with-open [to-channel (.getChannel (FileOutputStream. to))
                 from-channel (.getChannel (FileInputStream. from))]
       (.transferFrom to-channel from-channel 0 (.size from-channel)))))
@@ -207,5 +211,5 @@
 
 (defn touch [path & time]
   "Set file modification time (default to now)"
-  (let [file (File. path)]
+  (let [file (ensure-file path)]
     (.setLastModified file (if time time (System/currentTimeMillis)))))
