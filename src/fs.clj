@@ -213,3 +213,24 @@
   "Set file modification time (default to now)"
   (let [file (ensure-file path)]
     (.setLastModified file (if time time (System/currentTimeMillis)))))
+
+(defn chmod [mode path]
+  "Change file permissions.
+
+  'mode' can be any combination of \"r\" (readable) \"w\" (writable) and \"x\"
+  (executable). It should be prefixed with \"+\" to set or \"-\" to unset. And
+  optional prefix of \"u\" causes the permissions to be set for the owner only.
+  
+  Examples:
+  (chmod \"+x\" \"/tmp/foo\") -> Sets executable for everyone
+  (chmod \"u-wx\" \"/tmp/foo\") -> Unsets owner write and executable"
+  (when (not (exists? path)) (throw (IllegalArgumentException. "Not found")))
+  (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
+    (when (nil? op) (throw (IllegalArgumentException. "Bad mode")))
+    (let [perm-set (set permissions)
+          file (File. path)
+          flag (= op "+")
+          user (not (empty? u))]
+      (when (perm-set \r) (.setReadable file flag user))
+      (when (perm-set \w) (.setWritable file flag user))
+      (when (perm-set \x) (.setExecutable file flag user)))))

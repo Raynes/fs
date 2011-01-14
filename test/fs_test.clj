@@ -127,3 +127,10 @@
       (Thread/sleep 1000)
       (touch f)
       (is (> (mtime f) t))))
+
+(deftest test-chmod
+  (let [f (tempfile)]
+    (chmod "-x" f)
+    (is (not (executable? f)))
+    (chmod "+x" f)
+    (is (executable? f))))
