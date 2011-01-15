@@ -163,8 +163,8 @@
     (let [[c j] stream]
         (cond
          (nil? c) (re-pattern 
-                    ; We add ^ to the regexp since we check only for file names
-                    (str "^" (if (= \. (first s)) "" "(?=[^\\.])") re))
+                    ; We add ^ and $ since we check only for file names
+                    (str "^" (if (= \. (first s)) "" "(?=[^\\.])") re "$"))
          (= c \\) (recur (nnext stream) (str re c c) curly-depth)
          (= c \/) (recur (next stream) (str re (if (= \. j) c "/(?=[^\\.])"))
                          curly-depth)
