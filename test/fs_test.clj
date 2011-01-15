@@ -137,3 +137,17 @@
     (is (not (executable? f)))
     (chmod "+x" f)
     (is (executable? f))))
+
+(deftest test-copy-tree
+  (let [from (create-walk-dir)
+        to (tempdir)]
+    (swap! walk-atom (fn [_] #{}))
+    (copy-tree from to)
+    (walk to walk-fn)
+   (let [result @walk-atom]
+     (is (= result
+            #{[to #{"b" "a"} #{"1"}]
+              [(join to "a") #{} #{"2"}]
+              [(join to "b") #{} #{"3"}]})))))
+
+

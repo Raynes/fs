@@ -122,9 +122,6 @@
   (assert-exists from)
   (io/copy (io/as-file from) (io/as-file to)))
 
-; FIXME: Write this
-; (defn copytree [from to] ...
-
 (defn tempfile 
   "Create a temporary file."
   ([] (tempfile "-fs-" ""))
@@ -237,3 +234,18 @@
       (when (perm-set \r) (.setReadable file flag user))
       (when (perm-set \w) (.setWritable file flag user))
       (when (perm-set \x) (.setExecutable file flag user)))))
+
+(defn copy-tree [from to]
+  "Copy a directory from 'from' to 'to'"
+  (when (file? to) 
+    (throw (IllegalArgumentException. (format "%s is a file" to))))
+  (let [from (normpath from)
+        to (normpath to)
+        trim-size (inc (count from))
+        dest #(join to (subs % trim-size))]
+    (walk from
+      (fn [root dirs files]
+        (dorun (map #(when (not (directory? %)) (mkdirs (dest (join root %)))) 
+                    dirs))
+        (dorun (map #(copy (join root %) (dest (join root %))) files))))))
+

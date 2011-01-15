@@ -24,6 +24,8 @@ chmod
     Set/unset permission on path
 copy
     Copy a file
+copy-tree
+    Copy directory tree
 cwd
     Return the current working directory
 delete
