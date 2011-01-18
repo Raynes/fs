@@ -150,4 +150,5 @@
               [(join to "a") #{} #{"2"}]
               [(join to "b") #{} #{"3"}]})))))
 
-
+(deftest test-home
+  (is (= (home) (System/getenv "HOME"))))
