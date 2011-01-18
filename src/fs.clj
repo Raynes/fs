@@ -249,3 +249,6 @@
                     dirs))
         (dorun (map #(copy (join root %) (dest (join root %))) files))))))
 
+(defn home []
+  "User home directory"
+  (System/getProperty "user.home"))

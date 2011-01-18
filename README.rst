@@ -42,6 +42,8 @@ file?
     True if path is a file
 glob
     `ls` like operator
+home
+    User home directory
 join
     Join part to path
 listdir
