@@ -44,6 +44,8 @@ glob
     `ls` like operator
 home
     User home directory
+iterdir
+    Return a sequence of [root dirs files] from path
 join
     Join part to path
 listdir

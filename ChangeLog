@@ -1,3 +1,7 @@
+2011-01-20 version 0.5.1
+    * Fixed a bug in walk (thanks S11001001)
+    * iterdir
+
 2011-01-18 version 0.5.0
     * home
 
