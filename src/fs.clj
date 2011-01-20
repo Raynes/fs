@@ -185,29 +185,39 @@
                                           (accept [_ _ filename]
                                             (if (re-find regex filename)
                                               true false))))))))
-; walk helper functions
-(defn- w-directory? [f]
-  (.isDirectory f))
-(defn- w-file? [f]
-  (.isFile f))
-(defn- w-children [f]
+
+(defn- iterzip [z]
+  "Iterate over a zip, returns a sequence of the nodes with a nil suffix"
+  (when (not (zip/end? z))
+    (cons (zip/node z) (lazy-seq (iterzip (zip/next z))))))
+
+(defn- f-dir? [f]
+  (when f (.isDirectory f)))
+
+(defn- f-children [f]
   (.listFiles f))
-(defn- w-base [f]
+
+(defn- f-base [f]
   (.getName f))
 
-; FIXME: I'm sure the Clojure gurus out there will make this a 1 liner :)
+(defn- iterdir* [path]
+  (let [root (io/as-file path)
+        nodes (butlast (iterzip (zip/zipper f-dir? f-children nil root)))]
+    (filter f-dir? nodes)))
+
+(defn- walk-map-fn [root]
+  (let [kids (f-children root)
+        dirs (set (map f-base (filter f-dir? kids)))
+        files (set (map f-base (filter (complement f-dir?) kids)))]
+    [(strinfify root) dirs files]))
+
+(defn iterdir [path]
+  "Return a sequence [root dirs files], starting from path"
+  (map walk-map-fn (iterdir* path)))
+
 (defn walk [path func]
   "Walk over directory structure. Calls 'func' with [root dirs files]"
-  (loop [loc (zip/zipper w-directory? w-children nil (io/as-file path))]
-    (when (not (zip/end? loc))
-      (let [file (zip/node loc)]
-        (if (w-file? file)
-          (recur (zip/next loc))
-          (let [kids (w-children file)
-                dirs (set (map w-base (filter w-directory? kids)))
-                files (set (map w-base (filter w-file? kids)))]
-            (func (strinfify file) dirs files)
-            (recur (zip/next loc))))))))
+  (dorun (map #(apply func %) (iterdir path))))
 
 (defn touch [path & time]
   "Set file modification time (default to now)"
