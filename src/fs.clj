@@ -29,9 +29,10 @@
   (.canWrite (io/as-file path)))
 
 (defn delete
-  "Delete path."
+  "Delete path. Returns path."
   [path]
-  (.delete (io/as-file path)))
+  (.delete (io/as-file path))
+  path)
 
 ; FIXME: Write this
 ;(defn rmtree [root] ...)
@@ -85,14 +86,16 @@
   (.length (io/as-file path)))
 
 (defn mkdir
-  "Create a directory."
+  "Create a directory. Returns path."
   [path]
-  (.mkdir (io/as-file path)))
+  (.mkdir (io/as-file path))
+  path)
 
 (defn mkdirs
-  "Make directory tree."
+  "Make directory tree. Returns path."
   [path]
-  (.mkdirs (io/as-file path)))
+  (.mkdirs (io/as-file path))
+  path)
 
 (defn join
   "Join parts of path.\n\t(join [\"a\" \"b\"]) -> \"a/b\""
@@ -132,7 +135,7 @@
      (File/createTempFile prefix suffix (io/as-file directory)))))
 
 (defn tempdir
-  "Create a temporary directory"
+  "Create a temporary directory."
   ([] (let [dir (File/createTempFile "-fs-" "")
             path (.getAbsolutePath dir)]
         (.delete dir)
@@ -220,12 +223,13 @@
   (dorun (map #(apply func %) (iterdir path))))
 
 (defn touch [path & time]
-  "Set file modification time (default to now)"
+  "Set file modification time (default to now). Returns path."
   (let [file (ensure-file path)]
-    (.setLastModified file (if time (first time) (System/currentTimeMillis)))))
+    (.setLastModified file (if time (first time) (System/currentTimeMillis)))
+    path))
 
 (defn chmod [mode path]
-  "Change file permissions.
+  "Change file permissions. Returns path.
 
   'mode' can be any combination of \"r\" (readable) \"w\" (writable) and \"x\"
   (executable). It should be prefixed with \"+\" to set or \"-\" to unset. And
@@ -243,7 +247,8 @@
           user (not (empty? u))]
       (when (perm-set \r) (.setReadable file flag user))
       (when (perm-set \w) (.setWritable file flag user))
-      (when (perm-set \x) (.setExecutable file flag user)))))
+      (when (perm-set \x) (.setExecutable file flag user)))
+    path))
 
 (defn copy-tree [from to]
   "Copy a directory from 'from' to 'to'"
