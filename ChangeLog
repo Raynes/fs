@@ -1,3 +1,7 @@
+2011-01-20 version 0.5.2
+    * delete, mkdir, mdirs, touch and chmod now return the path to allow
+    chaining
+
 2011-01-20 version 0.5.1
     * Fixed a bug in walk (thanks S11001001)
     * iterdir
