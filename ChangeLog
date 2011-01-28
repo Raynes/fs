@@ -1,6 +1,10 @@
+2011-01-27 version 0.6.0
+    * copy-tree behaves like "cp -R src dest"
+    * copy+
+
 2011-01-20 version 0.5.2
     * delete, mkdir, mdirs, touch and chmod now return the path to allow
-    chaining
+      chaining
 
 2011-01-20 version 0.5.1
     * Fixed a bug in walk (thanks S11001001)

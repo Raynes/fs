@@ -24,6 +24,8 @@ chmod
     Set/unset permission on path
 copy
     Copy a file
+copy+
+    Copy a files, create directories if needed
 copy-tree
     Copy directory tree
 cwd
