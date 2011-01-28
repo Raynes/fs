@@ -144,11 +144,13 @@
     (swap! walk-atom (fn [_] #{}))
     (copy-tree from to)
     (walk to walk-fn)
-   (let [result @walk-atom]
+   (let [result @walk-atom
+         dest (join to (basename from))]
      (is (= result
-            #{[to #{"b" "a"} #{"1"}]
-              [(join to "a") #{} #{"2"}]
-              [(join to "b") #{} #{"3"}]})))))
+            #{[to #{(basename from)} #{}]
+              [dest #{"b" "a"} #{"1"}]
+              [(join dest "a") #{} #{"2"}]
+              [(join dest "b") #{} #{"3"}]})))))
 
 (deftest test-home
   (is (= (home) (System/getenv "HOME"))))
