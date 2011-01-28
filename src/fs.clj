@@ -250,7 +250,7 @@
       (when (perm-set \x) (.setExecutable file flag user)))
     path))
 
-(defn- copy+ [src dest]
+(defn copy+ [src dest]
   "Copy src to dest, create directories if needed."
   (mkdirs (dirname dest))
   (copy src dest))
