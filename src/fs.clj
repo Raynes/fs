@@ -250,19 +250,24 @@
       (when (perm-set \x) (.setExecutable file flag user)))
     path))
 
+(defn- copy+ [src dest]
+  "Copy src to dest, create directories if needed."
+  (mkdirs (dirname dest))
+  (copy src dest))
+
 (defn copy-tree [from to]
   "Copy a directory from 'from' to 'to'"
   (when (file? to) 
     (throw (IllegalArgumentException. (format "%s is a file" to))))
   (let [from (normpath from)
-        to (normpath to)
+        to (normpath (if (exists? to) (join to (basename from)) to))
         trim-size (inc (count from))
         dest #(join to (subs % trim-size))]
     (walk from
       (fn [root dirs files]
         (dorun (map #(when (not (directory? %)) (mkdirs (dest (join root %)))) 
                     dirs))
-        (dorun (map #(copy (join root %) (dest (join root %))) files))))))
+        (dorun (map #(copy+ (join root %) (dest (join root %))) files))))))
 
 (defn home []
   "User home directory"
