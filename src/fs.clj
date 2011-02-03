@@ -263,11 +263,13 @@
         to (normpath (if (exists? to) (join to (basename from)) to))
         trim-size (inc (count from))
         dest #(join to (subs % trim-size))]
+    (mkdirs to)
     (walk from
       (fn [root dirs files]
         (dorun (map #(when (not (directory? %)) (mkdirs (dest (join root %)))) 
                     dirs))
-        (dorun (map #(copy+ (join root %) (dest (join root %))) files))))))
+        (dorun (map #(copy+ (join root %) (dest (join root %))) files))))
+    to))
 
 (defn home []
   "User home directory"

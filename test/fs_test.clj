@@ -142,15 +142,16 @@
   (let [from (create-walk-dir)
         to (tempdir)]
     (swap! walk-atom (fn [_] #{}))
-    (copy-tree from to)
-    (walk to walk-fn)
-   (let [result @walk-atom
-         dest (join to (basename from))]
-     (is (= result
-            #{[to #{(basename from)} #{}]
-              [dest #{"b" "a"} #{"1"}]
-              [(join dest "a") #{} #{"2"}]
-              [(join dest "b") #{} #{"3"}]})))))
+    (let [path (copy-tree from to)
+          dest (join to (basename from))]
+      (is (= path dest))
+      (walk to walk-fn)
+      (let [result @walk-atom]
+        (is (= result
+               #{[to #{(basename from)} #{}]
+                 [dest #{"b" "a"} #{"1"}]
+                 [(join dest "a") #{} #{"2"}]
+                 [(join dest "b") #{} #{"3"}]}))))))
 
 (deftest test-home
   (is (= (home) (System/getenv "HOME"))))

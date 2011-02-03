@@ -27,11 +27,11 @@ copy
 copy+
     Copy a files, create directories if needed
 copy-tree
-    Copy directory tree
+    Copy directory tree, return path of created directory
 cwd
     Return the current working directory
 delete
-    Delete path
+    Delete path, return path
 directory?
     True if path is a directory
 dirname
@@ -53,7 +53,7 @@ join
 listdir
     List files under directory
 mkdir
-    Create directory
+    Create directory, return its path
 mtime
     File modification time
 mkdirs
@@ -63,7 +63,7 @@ normpath
 readable?
     Check if path is readable
 rename
-    Rename path
+    Rename path, return path of the new file
 separator
     Path separator
 size
@@ -71,11 +71,11 @@ size
 split
     Split path to parts
 tempdir
-    Create temporary directory
+    Create temporary directory, return its path
 tempfile 
-    Create temporary file
+    Create temporary file, return its path
 touch
-    Change file modification time
+    Change file modification time, return its path
 walk
     Walk over directory structure, calling function on every step
 writeable?
