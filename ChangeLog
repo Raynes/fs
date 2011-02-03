@@ -1,3 +1,6 @@
+2011-02-03 version 0.6.1
+    * copy-tree return path of created directory
+
 2011-01-27 version 0.6.0
     * copy-tree behaves like "cp -R src dest"
     * copy+
