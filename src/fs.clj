@@ -123,7 +123,8 @@
 
 (defn copy [from to]
   (assert-exists from)
-  (io/copy (io/as-file from) (io/as-file to)))
+  (io/copy (io/as-file from) (io/as-file to))
+  to)
 
 (defn tempfile 
   "Create a temporary file."
