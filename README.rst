@@ -23,7 +23,7 @@ basename
 chmod
     Set/unset permission on path
 copy
-    Copy a file
+    Copy a file, return path to destination
 copy+
     Copy a files, create directories if needed
 copy-tree
