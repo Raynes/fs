@@ -114,11 +114,11 @@
 
 (defn- ensure-file [path]
   (let [file (io/as-file path)]
-    (when (not (.exists file)) (.createNewFile file))
+    (when-not (.exists file) (.createNewFile file))
     file))
 
 (defn- assert-exists [path]
-  (when (not (exists? path))
+  (when-not (exists? path)
     (throw (IllegalArgumentException. (str path " not found")))))
 
 (defn copy [from to]
@@ -187,12 +187,12 @@
     (map #(.getPath %) (seq (.listFiles (io/as-file root)
                                         (reify FilenameFilter
                                           (accept [_ _ filename]
-                                            (if (re-find regex filename)
-                                              true false))))))))
+                                            (boolean (re-find regex 
+                                                              filename)))))))))
 
 (defn- iterzip [z]
   "Iterate over a zip, returns a sequence of the nodes with a nil suffix"
-  (when (not (zip/end? z))
+  (when-not (zip/end? z)
     (cons (zip/node z) (lazy-seq (iterzip (zip/next z))))))
 
 (defn- f-dir? [f]
@@ -267,7 +267,7 @@
     (mkdirs to)
     (walk from
       (fn [root dirs files]
-        (dorun (map #(when (not (directory? %)) (mkdirs (dest (join root %)))) 
+        (dorun (map #(when-not (directory? %) (mkdirs (dest (join root %)))) 
                     dirs))
         (dorun (map #(copy+ (join root %) (dest (join root %))) files))))
     to))
