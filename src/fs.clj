@@ -34,9 +34,6 @@
   (.delete (io/as-file path))
   path)
 
-; FIXME: Write this
-;(defn rmtree [root] ...)
-
 (defn exists?
   "Return true if path exists."
   [path]
@@ -56,12 +53,12 @@
   (strinfify (io/as-file path)))
 
 (defn basename
-  "Return basename (file part) of path.\n\t(basename \"/a/b/c\") -> \"c\""
+  "Return basename (file part) of path.\n\t(basename \"/a/b/c\") -> \"c\"."
   [path]
   (.getName (io/as-file path)))
 
 (defn dirname
-  "Return directory name of path.\n\t(dirname \"a/b/c\") -> \"/a/b\""
+  "Return directory name of path.\n\t(dirname \"a/b/c\") -> \"/a/b\"."
   [path]
   (.getParent (io/as-file path)))
 
@@ -98,12 +95,12 @@
   path)
 
 (defn join
-  "Join parts of path.\n\t(join [\"a\" \"b\"]) -> \"a/b\""
+  "Join parts of path.\n\t(join [\"a\" \"b\"]) -> \"a/b\"."
   [& parts]
   (apply str (interpose separator parts)))
 
 (defn split
-  "Split path to componenets.\n\t(split \"a/b/c\") -> (\"a\" \"b\" \"c\")"
+  "Split path to componenets.\n\t(split \"a/b/c\") -> (\"a\" \"b\" \"c\")."
   [path]
   (into [] (.split path separator)))
 
@@ -122,6 +119,7 @@
     (throw (IllegalArgumentException. (str path " not found")))))
 
 (defn copy [from to]
+  "Copy a file from 'from' to 'to'. Return 'to'."
   (assert-exists from)
   (io/copy (io/as-file from) (io/as-file to))
   to)
@@ -257,7 +255,7 @@
   (copy src dest))
 
 (defn copy-tree [from to]
-  "Copy a directory from 'from' to 'to'"
+  "Copy a directory from 'from' to 'to'."
   (when (file? to) 
     (throw (IllegalArgumentException. (format "%s is a file" to))))
   (let [from (normpath from)
@@ -271,6 +269,12 @@
                     dirs))
         (dorun (map #(copy+ (join root %) (dest (join root %))) files))))
     to))
+
+(defn deltree [root]
+  "Delete a directory tree."
+  (when (directory? root)
+    (dorun (map deltree (map #(join root %) (.list (io/as-file root))))))
+  (delete root))
 
 (defn home []
   "User home directory"

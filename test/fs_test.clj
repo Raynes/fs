@@ -153,5 +153,11 @@
                  [(join dest "a") #{} #{"2"}]
                  [(join dest "b") #{} #{"3"}]}))))))
 
+(deftest test-deltree
+  (let [root (create-walk-dir)
+        result (deltree root)]
+    (is (not (exists? root)))
+    (is (= root result))))
+
 (deftest test-home
   (is (= (home) (System/getenv "HOME"))))
