@@ -124,6 +124,8 @@
   (io/copy (io/as-file from) (io/as-file to))
   to)
 
+; FIXME: Have prefix, suffix and directory keword arguements and add
+; delete-on-exit
 (defn tempfile 
   "Create a temporary file."
   ([] (tempfile "-fs-" ""))
