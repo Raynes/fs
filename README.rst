@@ -32,6 +32,8 @@ cwd
     Return the current working directory
 delete
     Delete path, return path
+deltree
+    Delete directory tree, return path
 directory?
     True if path is a directory
 dirname
