@@ -87,13 +87,14 @@ writeable?
 
 Authors
 =======
-Miki Tebeka <miki.tebeka@gmail.com>
-Justin Kramer <jkkramer@gmail.com> (glob->regexp)
-Steve Miner (http://goo.gl/st7MJ) most of "extension" code
+
+* Miki Tebeka <miki.tebeka@gmail.com>
+* Justin Kramer <jkkramer@gmail.com> (glob->regexp)
+* Steve Miner (http://goo.gl/st7MJ) most of "extension" code
 
 Changes
 =======
-See here_
+See here_.
 
 .. _here: https://bitbucket.org/tebeka/fs/src/tip/ChangeLog
 
