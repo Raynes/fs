@@ -161,3 +161,10 @@
 
 (deftest test-home
   (is (= (home) (System/getenv "HOME"))))
+
+(deftest text-extension
+  (is (= (extension "fs.clj") ".clj"))
+  (is (= (extension "fs.") "."))
+  (is (= (extension "/path/to/fs") ""))
+  (is (= (extension "fs.clj.bak") ".bak"))
+  (is (= (extension "") "")))

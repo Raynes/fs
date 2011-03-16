@@ -6,7 +6,10 @@
   (:import java.io.File
            java.io.FilenameFilter))
 
-(def separator File/separator)
+; File separator
+(def *separator* File/separator)
+; Extension separator
+(def *extension-separator* ".")
 
 (defn listdir
   "List files under path."
@@ -57,6 +60,15 @@
   [path]
   (.getName (io/as-file path)))
 
+(defn extension
+  "Return the file extension.\n\t(extension \"fs.clj\") -> \".clj\"."
+  [path]
+  (let [base (basename path)
+        i (.lastIndexOf base *extension-separator*)]
+    (if (pos? i)
+      (subs base i)
+      "")))
+
 (defn dirname
   "Return directory name of path.\n\t(dirname \"a/b/c\") -> \"/a/b\"."
   [path]
@@ -97,12 +109,12 @@
 (defn join
   "Join parts of path.\n\t(join [\"a\" \"b\"]) -> \"a/b\"."
   [& parts]
-  (apply str (interpose separator parts)))
+  (apply str (interpose *separator* parts)))
 
 (defn split
   "Split path to componenets.\n\t(split \"a/b/c\") -> (\"a\" \"b\" \"c\")."
   [path]
-  (into [] (.split path separator)))
+  (into [] (.split path *separator*)))
 
 (defn rename
   "Rename old-path to new-path."
@@ -281,3 +293,4 @@
 (defn home []
   "User home directory"
   (System/getProperty "user.home"))
+
