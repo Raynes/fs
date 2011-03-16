@@ -42,6 +42,8 @@ executable?
     Check if path is executable
 exists?
     Check if path exists
+extension
+    Return the extension part of path
 file?
     True if path is a file
 glob
@@ -87,6 +89,14 @@ Authors
 =======
 Miki Tebeka <miki.tebeka@gmail.com>
 Justin Kramer <jkkramer@gmail.com> (glob->regexp)
+miner (http://goo.gl/st7MJ) most of "extension" code
+
+Changes
+=======
+See here_
+
+.. _here: https://bitbucket.org/tebeka/fs/src/tip/ChangeLog
+
 
 License
 =======
