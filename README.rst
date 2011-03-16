@@ -89,7 +89,7 @@ Authors
 =======
 Miki Tebeka <miki.tebeka@gmail.com>
 Justin Kramer <jkkramer@gmail.com> (glob->regexp)
-miner (http://goo.gl/st7MJ) most of "extension" code
+Steve Miner (http://goo.gl/st7MJ) most of "extension" code
 
 Changes
 =======
