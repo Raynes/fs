@@ -34,7 +34,7 @@
   (is (= (basename "/a/b/c") "c")))
 
 (deftest dirname-test
-  (is (= (dirname "/a/b/c") "/a/b")))
+  (is (= (dirname (join "a" "b" "c")) (join "a" "b"))))
 
 (deftest directory?-test
   (is (directory? ".")))
@@ -65,10 +65,10 @@
     (is (directory? sub))))
 
 (deftest join-test
-  (is (= (join "a" "b" "c") "a/b/c")))
+  (is (= (join "a" "b" "c") (apply str (interpose *separator* "abc")))))
 
 (deftest split-test
-  (is (= (split "a/b/c") '("a" "b" "c"))))
+  (is (= (split (apply str (interpose *separator* "abc"))) '("a" "b" "c"))))
 
 (deftest rename-test
   (let [f (tempfile)
