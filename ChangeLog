@@ -1,3 +1,6 @@
+2011-03-18 version 0.7.2
+    * Trying to make tests pass on Windows (issue #4)
+
 2011-03-16 version 0.7.1
     * extension (Steve Miner - http://goo.gl/st7MJ)
 
