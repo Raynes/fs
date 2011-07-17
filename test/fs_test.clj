@@ -40,29 +40,36 @@
   (is (directory? ".")))
 
 (deftest file?-test
-  (is (file? (tempfile))))
+  (let [tmp (tempfile)]
+    (is (file? tmp))
+    (delete tmp)))
 
 ; FIXME: This test sucks
 (deftest mtime-test
-  (is (> (mtime (tempfile)) 0)))
+  (let [tmp (tempfile)]
+    (is (> (mtime tmp) 0))
+    (delete tmp)))
 
 (deftest size-test
   (let [f (tempfile)]
     (spit f "abc")
-    (is (= (size f) 3))))
+    (is (= (size f) 3))
+    (delete f)))
 
 (deftest mkdir-test
   (let [f (tempfile)]
     (delete f)
     (mkdir f)
-    (is (directory? f))))
+    (is (directory? f))
+    (deltree f)))
 
 (deftest mkdirs-test
   (let [f (tempfile)
         sub (join f "a" "b")]
     (delete f)
     (mkdirs sub)
-    (is (directory? sub))))
+    (is (directory? sub))
+    (deltree f)))
 
 (deftest join-test
   (is (= (join "a" "b" "c") (apply str (interpose *separator* "abc")))))
@@ -75,15 +82,20 @@
         new-f (str f "-new")]
     (rename f new-f)
     (is (not (exists? f)))
-    (is (exists? new-f))))
+    (is (exists? new-f))
+    (delete new-f)))
 
 ; FIXME: Test all variations of tempfile
 (deftest tempfile-test
-  (is (file? (tempfile))))
+  (let [tmp (tempfile)]
+    (is (file? tmp))
+    (delete tmp)))
 
 ; FIXME: Test all variations of tempdir
 (deftest tempdir-test
-  (is (directory? (tempdir))))
+  (let [tmp (tempdir)]
+    (is (directory? tmp))
+    (deltree tmp)))
 
 ; FIXME: This test sucks
 (deftest cwd-test
@@ -110,7 +122,8 @@
      (is (= result
             #{[root #{"b" "a"} #{"1"}]
               [(join root "a") #{} #{"2"}]
-              [(join root "b") #{} #{"3"}]})))))
+              [(join root "b") #{} #{"3"}]}))
+     (deltree root))))
 
 (deftest copy-test
   (let [from (tempfile)
@@ -119,7 +132,9 @@
     (delete to)
     (spit from data)
     (copy from to)
-    (is (= (slurp from) (slurp to)))))
+    (is (= (slurp from) (slurp to)))
+    (delete from)
+    (delete to)))
 
 (deftest touch-test
     (let [f (tempfile)
@@ -129,14 +144,16 @@
       (is (> (mtime f) t))
       (let [t1 3000]
         (touch f t1)
-        (is (= (mtime f) t1)))))
+        (is (= (mtime f) t1)))
+      (delete f)))
 
 (deftest test-chmod
   (let [f (tempfile)]
     (chmod "-x" f)
     (is (not (executable? f)))
     (chmod "+x" f)
-    (is (executable? f))))
+    (is (executable? f))
+    (delete f)))
 
 (deftest test-copy-tree
   (let [from (create-walk-dir)
@@ -151,7 +168,9 @@
                #{[to #{(basename from)} #{}]
                  [dest #{"b" "a"} #{"1"}]
                  [(join dest "a") #{} #{"2"}]
-                 [(join dest "b") #{} #{"3"}]}))))))
+                 [(join dest "b") #{} #{"3"}]})))
+      (deltree from)
+      (deltree to))))
 
 (deftest test-deltree
   (let [root (create-walk-dir)
