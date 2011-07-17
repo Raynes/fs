@@ -1,3 +1,7 @@
+2011-05-31 version 0.8.1
+    * Fixed doc strings (Huw Giddens)
+    * Tests clean after themselfs (issue #6)
+
 2011-05-31 version 0.8.0
     * with-temp (by David Jagoe http://goo.gl/jVmbr)
     * Depends on Clojure 1.2.1
