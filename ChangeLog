@@ -1,3 +1,7 @@
+2011-05-31 version 0.8.0
+    * with-temp (by David Jagoe http://goo.gl/jVmbr)
+    * Depends on Clojure 1.2.1
+
 2011-03-18 version 0.7.2
     * Trying to make tests pass on Windows (issue #4)
 
