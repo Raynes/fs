@@ -130,8 +130,9 @@
   (when-not (exists? path)
     (throw (IllegalArgumentException. (str path " not found")))))
 
-(defn copy [from to]
+(defn copy
   "Copy a file from 'from' to 'to'. Return 'to'."
+  [from to]
   (assert-exists from)
   (io/copy (io/as-file from) (io/as-file to))
   to)
@@ -191,8 +192,9 @@
                                                   curly-depth)
          :else (recur (next stream) (str re c) curly-depth)))))
 
-(defn glob [pattern]
+(defn glob
   "Returns files matching glob pattern."
+  [pattern]
   (let [parts (split pattern)
         root (if (= (count parts) 1) "." (apply join (butlast parts)))
         regex (glob->regex (last parts))]
@@ -202,8 +204,9 @@
                                             (boolean (re-find regex 
                                                               filename)))))))))
 
-(defn- iterzip [z]
+(defn- iterzip
   "Iterate over a zip, returns a sequence of the nodes with a nil suffix"
+  [z]
   (when-not (zip/end? z)
     (cons (zip/node z) (lazy-seq (iterzip (zip/next z))))))
 
@@ -227,21 +230,24 @@
         files (set (map f-base (filter (complement f-dir?) kids)))]
     [(strinfify root) dirs files]))
 
-(defn iterdir [path]
+(defn iterdir
   "Return a sequence [root dirs files], starting from path"
+  [path]
   (map walk-map-fn (iterdir* path)))
 
-(defn walk [path func]
+(defn walk
   "Walk over directory structure. Calls 'func' with [root dirs files]"
+  [path func]
   (dorun (map #(apply func %) (iterdir path))))
 
-(defn touch [path & time]
+(defn touch
   "Set file modification time (default to now). Returns path."
+  [path & time]
   (let [file (ensure-file path)]
     (.setLastModified file (if time (first time) (System/currentTimeMillis)))
     path))
 
-(defn chmod [mode path]
+(defn chmod
   "Change file permissions. Returns path.
 
   'mode' can be any combination of \"r\" (readable) \"w\" (writable) and \"x\"
@@ -251,6 +257,7 @@
   Examples:
   (chmod \"+x\" \"/tmp/foo\") -> Sets executable for everyone
   (chmod \"u-wx\" \"/tmp/foo\") -> Unsets owner write and executable"
+  [mode path]
   (assert-exists path)
   (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
     (when (nil? op) (throw (IllegalArgumentException. "Bad mode")))
@@ -263,13 +270,15 @@
       (when (perm-set \x) (.setExecutable file flag user)))
     path))
 
-(defn copy+ [src dest]
+(defn copy+
   "Copy src to dest, create directories if needed."
+  [src dest]
   (mkdirs (dirname dest))
   (copy src dest))
 
-(defn copy-tree [from to]
+(defn copy-tree
   "Copy a directory from 'from' to 'to'."
+  [from to]
   (when (file? to) 
     (throw (IllegalArgumentException. (format "%s is a file" to))))
   (let [from (normpath from)
@@ -284,13 +293,15 @@
         (dorun (map #(copy+ (join root %) (dest (join root %))) files))))
     to))
 
-(defn deltree [root]
+(defn deltree
   "Delete a directory tree."
+  [root]
   (when (directory? root)
     (dorun (map deltree (map #(join root %) (.list (io/as-file root))))))
   (delete root))
 
-(defn home []
+(defn home
   "User home directory"
+  []
   (System/getProperty "user.home"))
 
