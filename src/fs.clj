@@ -7,9 +7,9 @@
            java.io.FilenameFilter))
 
 ; File separator
-(def *separator* File/separator)
+(def ^:dynamic *separator* File/separator)
 ; Extension separator
-(def *extension-separator* ".")
+(def ^:dynamic *extension-separator* ".")
 
 (defn listdir
   "List files under path."
