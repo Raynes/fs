@@ -134,6 +134,6 @@ See here_.
 
 License
 =======
-Copyright (C) 2010 Miki Tebeka <miki.tebeka@gmail.com>
+Copyright (C) 2010,2011 Miki Tebeka <miki.tebeka@gmail.com>
 
 Distributed under the Eclipse Public License, the same as Clojure.
