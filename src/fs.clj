@@ -317,8 +317,17 @@
   (System/getProperty "user.home"))
 
 (defn chdir
-  "Change directrory"
+  "Change directrory.
+  
+  This only changes the value of *cwd* (you can't change directory in Java)."
   [path]
   (intern (find-ns 'fs) '*cwd* (abspath path))
   path)
+
+; We do this trick with letfn due to some problems with macros and binding
+(letfn [[bind-cwd [path f] (binding [*cwd* path] (f))]]
+  (defmacro with-cwd
+    "Temporary change directory."
+    [path & body]
+    `(~bind-cwd ~path (fn [] ~@body))))
 

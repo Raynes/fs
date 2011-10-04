@@ -193,3 +193,9 @@
     (chdir path)
     (is (= *cwd* path))
     (is (= (cwd) path))))
+
+(deftest test-with-cwd
+  (with-cwd "/tmp"
+    (is (= (cwd) "/tmp")))
+  (is (= (cwd) *cwd*)))
+
