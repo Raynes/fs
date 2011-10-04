@@ -1,3 +1,6 @@
+??? version 0.10.0
+    * with-cwd, chdir (and *cwd*)
+
 2011-09-26 version 0.9.0
     * Clojure 1.3.0
 

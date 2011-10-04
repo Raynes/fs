@@ -22,6 +22,10 @@ abspath
 basename
     Return the last part of path
 
+chdir
+    Change directory. This only changes the value of *cwd* since Java does not
+    support changing directories.
+
 chmod
     Set/unset permission on path
 
@@ -115,6 +119,9 @@ touch
 walk
     Walk over directory structure, calling function on every step
 
+with-cwd
+    Temporary change directory and execute body.
+
 writeable?
     Check if path is writable
 
@@ -124,6 +131,7 @@ Authors
 * Miki Tebeka <miki.tebeka@gmail.com>
 * Justin Kramer <jkkramer@gmail.com> (glob->regexp)
 * Steve Miner (http://goo.gl/st7MJ) most of "extension" code
+* Bronsa <brobronsa@gmail.com> (with-cwd)
 
 Changes
 =======
