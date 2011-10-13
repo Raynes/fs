@@ -10,42 +10,53 @@
 (def ^:dynamic *separator* File/separator)
 ; Extension separator
 (def ^:dynamic *extension-separator* ".")
+(declare abspath)
+; Current working directory (you can't change directory in java)
+(def ^:dynamic *cwd* (.getAbsolutePath (io/as-file ".")))
+
+(declare join)
+(defn- as-file [path]
+  (cond
+    (= path "") (io/as-file "")
+    (= path ".") (io/as-file *cwd*)
+    (= (.substring path 0 1) *separator*) (io/as-file path)
+    :else (io/as-file (join *cwd* path))))
 
 (defn listdir
   "List files under path."
   [path]
-  (seq (.list (io/as-file path))))
+  (seq (.list (as-file path))))
 
 (defn executable?
   "Return true if path is executable."
   [path]
-  (.canExecute (io/as-file path)))
+  (.canExecute (as-file path)))
 
 (defn readable?
   "Return true if path is readable."
   [path]
-  (.canRead (io/as-file path)))
+  (.canRead (as-file path)))
 
 (defn writeable?
   "Return true if path is writeable."
   [path]
-  (.canWrite (io/as-file path)))
+  (.canWrite (as-file path)))
 
 (defn delete
   "Delete path. Returns path."
   [path]
-  (.delete (io/as-file path))
+  (.delete (as-file path))
   path)
 
 (defn exists?
   "Return true if path exists."
   [path]
-  (.exists (io/as-file path)))
+  (.exists (as-file path)))
 
 (defn abspath
   "Return absolute path."
   [path]
-  (.getAbsolutePath (io/as-file path)))
+  (.getAbsolutePath (as-file path)))
 
 (defn- strinfify [file]
   (.getCanonicalPath file))
@@ -53,12 +64,12 @@
 (defn normpath
   "Return nomralized (canonical) path."
   [path]
-  (strinfify (io/as-file path)))
+  (strinfify (as-file path)))
 
 (defn basename
   "Return basename (file part) of path.\n\t(basename \"/a/b/c\") -> \"c\"."
   [path]
-  (.getName (io/as-file path)))
+  (.getName (as-file path)))
 
 (defn extension
   "Return the file extension.\n\t(extension \"fs.clj\") -> \".clj\"."
@@ -77,33 +88,33 @@
 (defn directory?
   "Return true if path is a directory."
   [path]
-  (.isDirectory (io/as-file path)))
+  (.isDirectory (as-file path)))
 
 (defn file?
   "Return true if path is a file."
   [path]
-  (.isFile (io/as-file path)))
+  (.isFile (as-file path)))
 
 (defn mtime
   "Return file modification time."
   [path]
-  (.lastModified (io/as-file path)))
+  (.lastModified (as-file path)))
 
 (defn size
   "Return size (in bytes) if file."
   [path]
-  (.length (io/as-file path)))
+  (.length (as-file path)))
 
 (defn mkdir
   "Create a directory. Returns path."
   [path]
-  (.mkdir (io/as-file path))
+  (.mkdir (as-file path))
   path)
 
 (defn mkdirs
   "Make directory tree. Returns path."
   [path]
-  (.mkdirs (io/as-file path))
+  (.mkdirs (as-file path))
   path)
 
 (defn join
@@ -119,10 +130,10 @@
 (defn rename
   "Rename old-path to new-path."
   [old-path new-path]
-  (.renameTo (io/as-file old-path) (io/as-file new-path)))
+  (.renameTo (as-file old-path) (as-file new-path)))
 
 (defn- ensure-file [path]
-  (let [file (io/as-file path)]
+  (let [file (as-file path)]
     (when-not (.exists file) (.createNewFile file))
     file))
 
@@ -134,7 +145,7 @@
   "Copy a file from 'from' to 'to'. Return 'to'."
   [from to]
   (assert-exists from)
-  (io/copy (io/as-file from) (io/as-file to))
+  (io/copy (as-file from) (as-file to))
   to)
 
 ; FIXME: Have prefix, suffix and directory keword arguements and add
@@ -146,7 +157,7 @@
   ([prefix suffix] (.getAbsolutePath (File/createTempFile prefix suffix)))
   ([prefix suffix directory] 
    (.getAbsolutePath 
-     (File/createTempFile prefix suffix (io/as-file directory)))))
+     (File/createTempFile prefix suffix (as-file directory)))))
 
 (defn tempdir
   "Create a temporary directory."
@@ -156,7 +167,7 @@
         (.mkdir dir)
         path))
   ([root]
-   (let [dir (File/createTempFile "-fs-" "" (io/as-file root))
+   (let [dir (File/createTempFile "-fs-" "" (as-file root))
          path (.getAbsolutePath dir)]
      (.delete dir)
      (.mkdir dir)
@@ -198,7 +209,7 @@
   (let [parts (split pattern)
         root (if (= (count parts) 1) "." (apply join (butlast parts)))
         regex (glob->regex (last parts))]
-    (map #(.getPath %) (seq (.listFiles (io/as-file root)
+    (map #(.getPath %) (seq (.listFiles (as-file root)
                                         (reify FilenameFilter
                                           (accept [_ _ filename]
                                             (boolean (re-find regex 
@@ -220,7 +231,7 @@
   (.getName f))
 
 (defn- iterdir* [path]
-  (let [root (io/as-file path)
+  (let [root (as-file path)
         nodes (butlast (iterzip (zip/zipper f-dir? f-children nil root)))]
     (filter f-dir? nodes)))
 
@@ -262,7 +273,7 @@
   (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
     (when (nil? op) (throw (IllegalArgumentException. "Bad mode")))
     (let [perm-set (set permissions)
-          file (io/as-file path)
+          file (as-file path)
           flag (= op "+")
           user (not (empty? u))]
       (when (perm-set \r) (.setReadable file flag user))
@@ -297,11 +308,26 @@
   "Delete a directory tree."
   [root]
   (when (directory? root)
-    (dorun (map deltree (map #(join root %) (.list (io/as-file root))))))
+    (dorun (map deltree (map #(join root %) (.list (as-file root))))))
   (delete root))
 
 (defn home
   "User home directory"
   []
   (System/getProperty "user.home"))
+
+(defn chdir
+  "Change directrory.
+  
+  This only changes the value of *cwd* (you can't change directory in Java)."
+  [path]
+  (intern (find-ns 'fs) '*cwd* (abspath path))
+  path)
+
+; We do this trick with letfn due to some problems with macros and binding
+(letfn [[bind-cwd [path f] (binding [*cwd* path] (f))]]
+  (defmacro with-cwd
+    "Temporary change directory."
+    [path & body]
+    `(~bind-cwd ~path (fn [] ~@body))))
 

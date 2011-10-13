@@ -187,3 +187,15 @@
   (is (= (extension "/path/to/fs") ""))
   (is (= (extension "fs.clj.bak") ".bak"))
   (is (= (extension "") "")))
+
+(deftest test-chdir
+  (let [path "/tmp"]
+    (chdir path)
+    (is (= *cwd* path))
+    (is (= (cwd) path))))
+
+(deftest test-with-cwd
+  (with-cwd "/tmp"
+    (is (= (cwd) "/tmp")))
+  (is (= (cwd) *cwd*)))
+
