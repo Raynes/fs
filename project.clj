@@ -1,4 +1,4 @@
-(defproject fs "0.10.0"
+(defproject fs "0.10.1"
   :description "File system utilities for clojure"
   :url "https://bitbucket.org/tebeka/fs/src"
   :dependencies [[org.clojure/clojure "1.3.0"]])
