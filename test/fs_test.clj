@@ -103,7 +103,7 @@
   (is (> (count (cwd)) 3)))
 
 (defn create-walk-dir []
-  (let [root (tempdir)]
+  (let [root (normpath (tempdir))]
     (mkdir (join root "a"))
     (mkdir (join root "b"))
     (spit (join root "1") "1")
