@@ -17,6 +17,7 @@
 (declare join)
 (defn- as-file [path]
   (cond
+    (instance? File path) path
     (= path "") (io/as-file "")
     (= path ".") (io/as-file *cwd*)
     (= (.substring path 0 1) *separator*) (io/as-file path)

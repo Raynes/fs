@@ -1,4 +1,5 @@
 (ns fs-test
+  (:import java.io.File)
   (:use [fs] :reload-all)
   (:use [clojure.test]))
 
@@ -199,3 +200,6 @@
     (is (= (cwd) "/tmp")))
   (is (= (cwd) *cwd*)))
 
+(deftest test-file
+  ; Test that we work with java.io.File objects as well
+  (is (directory? (File. "/tmp"))))
