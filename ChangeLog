@@ -1,3 +1,10 @@
+2011-11-03 version 0.11.0
+    * Handle java.io.File as argument (issue #8)
+    * Fix tests on OSX (issue #7)
+
+2011-10-13 version 0.10.1
+    * ???
+
 2011-10-13 version 0.10.0
     * with-cwd, chdir (and *cwd*)
 
