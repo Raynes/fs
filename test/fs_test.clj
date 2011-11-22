@@ -3,6 +3,8 @@
   (:use [fs] :reload-all)
   (:use [clojure.test]))
 
+(def system-tempdir (. System getProperty "java.io.tmpdir"))
+
 (deftest listdir-test
   (is (not (empty? (listdir ".")))))
 
@@ -114,7 +116,7 @@
 (def walk-atom (atom #{}))
 
 (defn walk-fn [root dirs files]
-  (swap! walk-atom conj [root dirs files]))
+  (swap! walk-atom conj [(normpath root) dirs files]))
 
 (deftest walk-test
  (let [root (create-walk-dir)]
@@ -150,19 +152,22 @@
 
 (deftest test-chmod
   (let [f (tempfile)]
-    (chmod "-x" f)
-    (is (not (executable? f)))
+    ; Skip "-x" on windows, since it'll never work.
+    ; (see http://java.sun.com/developer/technicalArticles/J2SE/Desktop/javase6/enhancements/ )
+    (when (.setExecutable (new File f) false)
+      (chmod "-x" f)
+      (is (not (executable? f))))
     (chmod "+x" f)
     (is (executable? f))
     (delete f)))
 
 (deftest test-copy-tree
   (let [from (create-walk-dir)
-        to (tempdir)]
+        to (normpath (tempdir))]
     (swap! walk-atom (fn [_] #{}))
     (let [path (copy-tree from to)
           dest (join to (basename from))]
-      (is (= path dest))
+      (is (= (normpath path) (normpath dest)))
       (walk to walk-fn)
       (let [result @walk-atom]
         (is (= result
@@ -179,8 +184,11 @@
     (is (not (exists? root)))
     (is (= root result))))
 
-(deftest test-home
-  (is (= (home) (System/getenv "HOME"))))
+; Skipping on windows, which has somewhat wacky
+; and complicated ideas about what HOME means.
+(when (System/getenv "HOME")
+  (deftest test-home
+    (is (= (home) (System/getenv "HOME")))))
 
 (deftest text-extension
   (is (= (extension "fs.clj") ".clj"))
@@ -190,16 +198,16 @@
   (is (= (extension "") "")))
 
 (deftest test-chdir
-  (let [path "/tmp"]
+  (let [path system-tempdir]
     (chdir path)
-    (is (= *cwd* path))
-    (is (= (cwd) path))))
+    (is (= (normpath *cwd*) (normpath path)))
+    (is (= (normpath (cwd)) (normpath path)))))
 
 (deftest test-with-cwd
-  (with-cwd "/tmp"
-    (is (= (cwd) "/tmp")))
+  (with-cwd system-tempdir
+    (is (= (normpath (cwd)) (normpath system-tempdir))))
   (is (= (cwd) *cwd*)))
 
 (deftest test-file
   ; Test that we work with java.io.File objects as well
-  (is (directory? (File. "/tmp"))))
+  (is (directory? (File. system-tempdir))))

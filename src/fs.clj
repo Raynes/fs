@@ -12,16 +12,19 @@
 (def ^:dynamic *extension-separator* ".")
 (declare abspath)
 ; Current working directory (you can't change directory in java)
-(def ^:dynamic *cwd* (.getAbsolutePath (io/as-file ".")))
+(def ^:dynamic *cwd* (.getCanonicalPath (io/as-file ".")))
 
-(declare join)
 (defn- as-file [path]
+  "The challenge is to work nicely with *cwd*"
   (cond
-    (instance? File path) path
-    (= path "") (io/as-file "")
-    (= path ".") (io/as-file *cwd*)
-    (= (.substring path 0 1) *separator*) (io/as-file path)
-    :else (io/as-file (join *cwd* path))))
+   (instance? File path) path
+   (= path "") (io/as-file "")
+   (= path ".") (io/as-file *cwd*)
+   :else
+   (let [ try (new File path) ]
+         (if (.isAbsolute try)
+           try
+           (new File *cwd* path)))))
 
 (defn listdir
   "List files under path."
@@ -126,7 +129,7 @@
 (defn split
   "Split path to componenets.\n\t(split \"a/b/c\") -> (\"a\" \"b\" \"c\")."
   [path]
-  (into [] (.split path *separator*)))
+  (into [] (.split path (str "\\Q" *separator* "\\E"))))
 
 (defn rename
   "Rename old-path to new-path."
