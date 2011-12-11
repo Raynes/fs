@@ -15,21 +15,21 @@
              Changing this will only change the working directory for functions
              in this library."}
   cwd (atom (.getCanonicalFile (io/file "."))))
-(defn- as-file
-  "The challenge is to work nicely with *cwd*"
-  [path]
-  (cond
-   (instance? File path) path
-   (= path "") (io/as-file "")
-   (= path ".") (io/as-file *cwd*)
-   :else
-   (let [ try (new File path) ]
-         (if (.isAbsolute try)
-           try
-           (new File *cwd* path)))))
 
-(defn listdir
-  "List files under path."
+;; Library functions will call this function on paths/files so that
+;; we get the cwd effect on them.
+(defn- as-file
+  "If path is a period, replaces it with cwd and creates a new File object
+   out of it and paths. Or, if the resulting File object does not constitute
+   an absolute path, makes it absolutely by creating a new File object out of
+   the paths and cwd."
+  [path & paths]
+  (when path
+    (let [path (apply io/file (cons (if (= path ".") @cwd path) paths))]
+      (if (.isAbsolute path)
+        path
+        (io/file @cwd path)))))
+
   [path]
   (seq (.list (as-file path))))
 
