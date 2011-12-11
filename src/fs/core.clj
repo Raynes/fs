@@ -122,9 +122,9 @@
   path)
 
 (defn split
-  "Split path to componenets.\n\t(split \"a/b/c\") -> (\"a\" \"b\" \"c\")."
+  "Split path to componenets."
   [path]
-  (into [] (.split path (str "\\Q" *separator* "\\E"))))
+  (seq (.split (str path) (str "\\Q" File/separator "\\E"))))
 
 (defn rename
   "Rename old-path to new-path."
