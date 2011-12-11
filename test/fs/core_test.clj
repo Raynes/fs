@@ -1,7 +1,7 @@
-(ns fs-test
-  (:import java.io.File)
-  (:use [fs] :reload-all)
-  (:use [clojure.test]))
+(ns fs.core-test
+  (:use fs.core
+        clojure.test)
+  (:import java.io.File))
 
 (def system-tempdir (. System getProperty "java.io.tmpdir"))
 
