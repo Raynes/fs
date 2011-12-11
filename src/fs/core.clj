@@ -229,17 +229,17 @@
   (let [kids (f-children root)
         dirs (set (map f-base (filter f-dir? kids)))
         files (set (map f-base (filter (complement f-dir?) kids)))]
-    [(strinfify root) dirs files]))
+    [root dirs files]))
 
-(defn iterdir
+(defn iterate-dir
   "Return a sequence [root dirs files], starting from path"
   [path]
   (map walk-map-fn (iterdir* path)))
 
 (defn walk
   "Walk over directory structure. Calls 'func' with [root dirs files]"
-  [path func]
-  (dorun (map #(apply func %) (iterdir path))))
+  [func path]
+  (map #(apply func %) (iterdir path)))
 
 (defn touch
   "Set file modification time (default to now). Returns path."
