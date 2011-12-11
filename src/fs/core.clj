@@ -5,6 +5,16 @@
   (:import java.io.File
            java.io.FilenameFilter))
 
+;; Once you've started a JVM, that JVM's working directory is set in stone
+;; and cannot be changed. This library will provide a way to simulate a
+;; working directory change. `cwd` is considered to be the current working
+;; directory for functions in this library. Unfortunately, this will only
+;; apply to functions inside this library since we can't change the JVM's
+;; actual working directory.
+(def ^{:doc "Current working directory. This cannot be changed in the JVM.
+             Changing this will only change the working directory for functions
+             in this library."}
+  cwd (atom (.getCanonicalFile (io/file "."))))
 (defn- as-file
   "The challenge is to work nicely with *cwd*"
   [path]
