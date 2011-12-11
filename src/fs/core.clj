@@ -105,7 +105,7 @@
   (.lastModified (as-file path)))
 
 (defn size
-  "Return size (in bytes) if file."
+  "Return size (in bytes) of file."
   [path]
   (.length (as-file path)))
 
