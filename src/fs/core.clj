@@ -3,7 +3,7 @@
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io])
   (:import (java.io File FilenameFilter)
-           java.util.zip.ZipFile))
+           (java.util.zip ZipFile GZIPInputStream)))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
 ;; and cannot be changed. This library will provide a way to simulate a
@@ -18,7 +18,7 @@
 
 ;; Library functions will call this function on paths/files so that
 ;; we get the cwd effect on them.
-(defn- as-file
+(defn file
   "If path is a period, replaces it with cwd and creates a new File object
    out of it and paths. Or, if the resulting File object does not constitute
    an absolute path, makes it absolutely by creating a new File object out of
@@ -33,58 +33,58 @@
 (defn list-dir
   "List files and directories under path."
   [path]
-  (seq (.list (as-file path))))
+  (seq (.list (file path))))
 
 (defn executable?
   "Return true if path is executable."
   [path]
-  (.canExecute (as-file path)))
+  (.canExecute (file path)))
 
 (defn readable?
   "Return true if path is readable."
   [path]
-  (.canRead (as-file path)))
+  (.canRead (file path)))
 
 (defn writeable?
   "Return true if path is writeable."
   [path]
-  (.canWrite (as-file path)))
+  (.canWrite (file path)))
 
 (defn delete
   "Delete path. Returns path."
   [path]
-  (.delete (as-file path))
+  (.delete (file path))
   path)
 
 (defn exists?
   "Return true if path exists."
   [path]
-  (.exists (as-file path)))
+  (.exists (file path)))
 
 (defn absolute-path
   "Return absolute path."
   [path]
-  (.getAbsolutePath (as-file path)))
+  (.getAbsolutePath (file path)))
 
 (defn normalized-path
   "Return normalized (canonical) path."
   [path]
-  (.getCanonicalFile (as-file path)))
+  (.getCanonicalFile (file path)))
 
 (defn base-name
   "Return the base name (final segment/file part) of a path."
   [path]
-  (.getName (as-file path)))
+  (.getName (file path)))
 
 (defn directory?
   "Return true if path is a directory."
   [path]
-  (.isDirectory (as-file path)))
+  (.isDirectory (file path)))
 
 (defn file?
   "Return true if path is a file."
   [path]
-  (.isFile (as-file path)))
+  (.isFile (file path)))
 
 (defn extension
   "Return the file extension."
@@ -97,28 +97,28 @@
 (defn parent
   "Return the parent path."
   [path]
-  (.getParent (as-file path)))
+  (.getParent (file path)))
 
 (defn mod-time
   "Return file modification time."
   [path]
-  (.lastModified (as-file path)))
+  (.lastModified (file path)))
 
 (defn size
   "Return size (in bytes) of file."
   [path]
-  (.length (as-file path)))
+  (.length (file path)))
 
 (defn mkdir
   "Create a directory. Returns path."
   [path]
-  (.mkdir (as-file path))
+  (.mkdir (file path))
   path)
 
 (defn mkdirs
   "Make directory tree. Returns path."
   [path]
-  (.mkdirs (as-file path))
+  (.mkdirs (file path))
   path)
 
 (defn split
@@ -129,13 +129,13 @@
 (defn rename
   "Rename old-path to new-path. Only works on files."
   [old-path new-path]
-  (.renameTo (as-file old-path) (as-file new-path)))
+  (.renameTo (file old-path) (file new-path)))
 
 (defn- ensure-file [path]
-  (let [file (as-file path)]
-    (when-not (.exists file)
-      (.createNewFile file))
-    file))
+  (let [f (file path)]
+    (when-not (.exists f)
+      (.createNewFile f))
+    f))
 
 (defn- assert-exists [path]
   (when-not (exists? path)
@@ -145,7 +145,7 @@
   "Copy a file from 'from' to 'to'. Return 'to'."
   [from to]
   (assert-exists from)
-  (io/copy (as-file from) (as-file to))
+  (io/copy (file from) (file to))
   to)
 
 (defn temp-file 
@@ -157,13 +157,13 @@
   ([prefix suffix]
      (File/createTempFile prefix suffix))
   ([prefix suffix directory]
-     (File/createTempFile prefix suffix (as-file directory))))
+     (File/createTempFile prefix suffix (file directory))))
 
 (defn temp-dir
   "Create a temporary directory."
   ([] (temp-dir nil))
   ([root]
-   (let [dir (File/createTempFile "-fs-" "" (as-file root))]
+   (let [dir (File/createTempFile "-fs-" "" (file root))]
      (delete dir)
      (mkdir dir)
      dir)))
@@ -200,7 +200,7 @@
         root (if (= (count parts) 1) ["."] (butlast parts))
         regex (glob->regex (last parts))]
     (seq (.listFiles
-          (apply as-file root)
+          (apply file root)
           (reify FilenameFilter
             (accept [_ _ filename]
               (boolean (re-find regex filename))))))))
@@ -221,7 +221,7 @@
   (.getName f))
 
 (defn- iterate-dir* [path]
-  (let [root (as-file path)
+  (let [root (file path)
         nodes (butlast (iterzip (zip/zipper f-dir? f-children nil root)))]
     (filter f-dir? nodes)))
 
@@ -263,12 +263,12 @@
   (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
     (when (nil? op) (throw (IllegalArgumentException. "Bad mode")))
     (let [perm-set (set permissions)
-          file (as-file path)
+          f (file path)
           flag (= op "+")
           user (not (empty? u))]
-      (when (perm-set \r) (.setReadable file flag user))
-      (when (perm-set \w) (.setWritable file flag user))
-      (when (perm-set \x) (.setExecutable file flag user)))
+      (when (perm-set \r) (.setReadable f flag user))
+      (when (perm-set \w) (.setWritable f flag user))
+      (when (perm-set \x) (.setExecutable f flag user)))
     path))
 
 (defn copy+
@@ -284,20 +284,20 @@
   (when (exists? from)
     (if (file? to) 
       (throw (IllegalArgumentException. (str to " is a file")))
-      (let [from (as-file from)
+      (let [from (file from)
             to (if (exists? to)
-                 (as-file to (base-name from))
-                 (as-file to))
+                 (file to (base-name from))
+                 (file to))
             trim-size (-> from .getPath count inc)
-            dest #(as-file to (subs (.getPath %) trim-size))]
+            dest #(file to (subs (.getPath %) trim-size))]
         (mkdirs to)
         (dorun
          (walk (fn [root dirs files]
                  (doseq [dir dirs]
                    (when-not (directory? dir)
-                     (-> root (as-file dir) dest mkdirs)))
-                 (doseq [file files]
-                   (copy+ (as-file root file) (dest (as-file root file)))))
+                     (-> root (file dir) dest mkdirs)))
+                 (doseq [f files]
+                   (copy+ (file root f) (dest (file root f)))))
                from))
         to))))
 
@@ -305,7 +305,7 @@
   "Delete a directory tree."
   [root]
   (when (directory? root)
-    (doseq [path (map #(as-file root %) (.list (as-file root)))]
+    (doseq [path (map #(file root %) (.list (file root)))]
       (delete-dir path)))
   (delete root))
 
@@ -321,11 +321,17 @@
 (defn unzip
   "Takes the path to a zipfile source and unzips it to target-dir."
   [source target-dir]
-  (let [zip (ZipFile. (as-file source))
+  (let [zip (ZipFile. (file source))
         entries (enumeration-seq (.entries zip))
-        target-file #(as-file target-dir (.getName %))]
+        target-file #(file target-dir (.getName %))]
     (doseq [entry entries :when (not (.isDirectory entry))
             :let [f (target-file entry)]]
       (mkdirs (parent f))
       (io/copy (.getInputStream zip entry) f)))
   target-dir)
+
+(defn gunzip
+  "Takes a path to a gzip file source and unzips it."
+  [source target]
+  (io/copy (-> source file io/input-stream GZIPInputStream.)
+           (file target)))
