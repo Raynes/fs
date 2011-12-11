@@ -311,8 +311,7 @@
 
 (defn home
   "User home directory"
-  []
-  (System/getProperty "user.home"))
+  [] (System/getProperty "user.home"))
 
 (defn chdir
   "Change directrory.
