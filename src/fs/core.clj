@@ -246,7 +246,7 @@
   [path & time]
   (let [file (ensure-file path)]
     (.setLastModified file (if time (first time) (System/currentTimeMillis)))
-    path))
+    file))
 
 (defn chmod
   "Change file permissions. Returns path.
