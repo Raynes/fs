@@ -199,11 +199,11 @@
   (let [parts (split pattern)
         root (if (= (count parts) 1) "." (apply join (butlast parts)))
         regex (glob->regex (last parts))]
-    (map #(.getPath %) (seq (.listFiles (as-file root)
-                                        (reify FilenameFilter
-                                          (accept [_ _ filename]
-                                            (boolean (re-find regex 
-                                                              filename)))))))))
+    (seq (.listFiles
+          (as-file root)
+          (reify FilenameFilter
+            (accept [_ _ filename]
+              (boolean (re-find regex filename))))))))
 
 (defn- iterzip
   "Iterate over a zip, returns a sequence of the nodes with a nil suffix"
