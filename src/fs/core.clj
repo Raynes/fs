@@ -61,7 +61,7 @@
   [path]
   (.exists (as-file path)))
 
-(defn abspath
+(defn absolute-path
   "Return absolute path."
   [path]
   (.getAbsolutePath (as-file path)))
