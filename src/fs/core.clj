@@ -1,4 +1,4 @@
-(ns fs
+(ns fs.core
   "File system utilities in Clojure"
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io])
