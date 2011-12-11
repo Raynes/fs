@@ -121,11 +121,6 @@
   (.mkdirs (as-file path))
   path)
 
-(defn join
-  "Join parts of path.\n\t(join [\"a\" \"b\"]) -> \"a/b\"."
-  [& parts]
-  (apply str (interpose *separator* parts)))
-
 (defn split
   "Split path to componenets.\n\t(split \"a/b/c\") -> (\"a\" \"b\" \"c\")."
   [path]
