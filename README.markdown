@@ -17,6 +17,7 @@ This library was originally devised and maintained by Miki Tebeka, but [I](https
 * [Anthony Grimes](https://github.com/Raynes)
 
 ## License
+
 Copyright (C) 2010,2011 Miki Tebeka, Anthony Grimes
 
 Distributed under the Eclipse Public License, the same as Clojure.
