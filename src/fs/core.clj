@@ -133,7 +133,8 @@
 
 (defn- ensure-file [path]
   (let [file (as-file path)]
-    (when-not (.exists file) (.createNewFile file))
+    (when-not (.exists file)
+      (.createNewFile file))
     file))
 
 (defn- assert-exists [path]
