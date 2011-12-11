@@ -148,35 +148,29 @@
   (io/copy (as-file from) (as-file to))
   to)
 
-; FIXME: Have prefix, suffix and directory keword arguements and add
-; delete-on-exit
-(defn tempfile 
+(defn temp-file 
   "Create a temporary file."
-  ([] (tempfile "-fs-" ""))
-  ([prefix] (tempfile prefix ""))
-  ([prefix suffix] (.getAbsolutePath (File/createTempFile prefix suffix)))
-  ([prefix suffix directory] 
-   (.getAbsolutePath 
-     (File/createTempFile prefix suffix (as-file directory)))))
+  ([]
+     (tempfile "-fs-" ""))
+  ([prefix]
+     (tempfile prefix ""))
+  ([prefix suffix]
+     (File/createTempFile prefix suffix))
+  ([prefix suffix directory]
+     (File/createTempFile prefix suffix (as-file directory))))
 
-(defn tempdir
+(defn temp-dir
   "Create a temporary directory."
-  ([] (let [dir (File/createTempFile "-fs-" "")
-            path (.getAbsolutePath dir)]
-        (.delete dir)
-        (.mkdir dir)
-        path))
+  ([] (temp-dir nil))
   ([root]
-   (let [dir (File/createTempFile "-fs-" "" (as-file root))
-         path (.getAbsolutePath dir)]
-     (.delete dir)
-     (.mkdir dir)
-     path)))
-
 (defn cwd
   "Return the current working directory."
   []
   (abspath "."))
+   (let [dir (File/createTempFile "-fs-" "" (as-file root))]
+     (delete dir)
+     (mkdir dir)
+     dir)))
 
 ; Taken from https://github.com/jkk/clj-glob. (thanks Justin!)
 (defn- glob->regex
