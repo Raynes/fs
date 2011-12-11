@@ -274,7 +274,7 @@
 (defn copy+
   "Copy src to dest, create directories if needed."
   [src dest]
-  (mkdirs (dirname dest))
+  (mkdirs (parent dest))
   (copy src dest))
 
 (defn copy-tree
