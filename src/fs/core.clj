@@ -3,6 +3,7 @@
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io])
   (:import (java.io File FilenameFilter)
+           java.util.zip.ZipFile))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
 ;; and cannot be changed. This library will provide a way to simulate a
@@ -316,3 +317,15 @@
   "Change directory. This only changes the value of cwd
    (you can't change directory in Java)."
   [path] (swap! cwd (constantly path)))
+
+(defn unzip
+  "Takes the path to a zipfile source and unzips it to target-dir."
+  [source target-dir]
+  (let [zip (ZipFile. (as-file source))
+        entries (enumeration-seq (.entries zip))
+        target-file #(as-file target-dir (.getName %))]
+    (doseq [entry entries :when (not (.isDirectory entry))
+            :let [f (target-file entry)]]
+      (mkdirs (parent f))
+      (io/copy (.getInputStream zip entry) f)))
+  target-dir)
