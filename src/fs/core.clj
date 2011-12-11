@@ -277,28 +277,36 @@
   (mkdirs (parent dest))
   (copy src dest))
 
-(defn copy-tree
-  "Copy a directory from 'from' to 'to'."
+(defn copy-dir
+  "Copy a directory from 'from' to 'to'. If 'to' already exists, copy the directory
+   to a directory with the same name as 'from' within the 'to' directory."
   [from to]
-  (when (file? to) 
-    (throw (IllegalArgumentException. (format "%s is a file" to))))
-  (let [from (normpath from)
-        to (normpath (if (exists? to) (join to (basename from)) to))
-        trim-size (inc (count from))
-        dest #(join to (subs % trim-size))]
-    (mkdirs to)
-    (walk from
-      (fn [root dirs files]
-        (dorun (map #(when-not (directory? %) (mkdirs (dest (join root %)))) 
-                    dirs))
-        (dorun (map #(copy+ (join root %) (dest (join root %))) files))))
-    to))
+  (when (exists? from)
+    (if (file? to) 
+      (throw (IllegalArgumentException. (str to " is a file")))
+      (let [from (as-file from)
+            to (if (exists? to)
+                 (as-file to (base-name from))
+                 (as-file to))
+            trim-size (-> from .getPath count inc)
+            dest #(as-file to (subs (.getPath %) trim-size))]
+        (mkdirs to)
+        (dorun
+         (walk (fn [root dirs files]
+                 (doseq [dir dirs]
+                   (when-not (directory? dir)
+                     (-> root (as-file dir) dest mkdirs)))
+                 (doseq [file files]
+                   (copy+ (as-file root file) (dest (as-file root file)))))
+               from))
+        to))))
 
-(defn deltree
+(defn delete-dir
   "Delete a directory tree."
   [root]
   (when (directory? root)
-    (dorun (map deltree (map #(join root %) (.list (as-file root))))))
+    (doseq [path (map #(as-file root %) (.list (as-file root)))]
+      (deltree path)))
   (delete root))
 
 (defn home
