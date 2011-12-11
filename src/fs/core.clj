@@ -86,7 +86,6 @@
   [path]
   (.isFile (as-file path)))
 
-(defn mtime
 (defn extension
   "Return the file extension."
   [path]
@@ -100,6 +99,7 @@
   [path]
   (.getParent (as-file path)))
 
+(defn mod-time
   "Return file modification time."
   [path]
   (.lastModified (as-file path)))
