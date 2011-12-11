@@ -5,14 +5,6 @@
   (:import java.io.File
            java.io.FilenameFilter))
 
-; File separator
-(def ^:dynamic *separator* File/separator)
-; Extension separator
-(def ^:dynamic *extension-separator* ".")
-(declare abspath)
-; Current working directory (you can't change directory in java)
-(def ^:dynamic *cwd* (.getCanonicalPath (io/as-file ".")))
-
 (defn- as-file
   "The challenge is to work nicely with *cwd*"
   [path]
