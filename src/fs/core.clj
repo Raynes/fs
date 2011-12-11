@@ -3,7 +3,8 @@
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io])
   (:import (java.io File FilenameFilter)
-           (java.util.zip ZipFile GZIPInputStream)))
+           (java.util.zip ZipFile GZIPInputStream)
+           org.apache.commons.compress.archivers.tar.TarArchiveInputStream))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
 ;; and cannot be changed. This library will provide a way to simulate a
@@ -329,6 +330,21 @@
       (mkdirs (parent f))
       (io/copy (.getInputStream zip entry) f)))
   target-dir)
+
+(defn- tar-entries
+  "Get a lazy-seq of entries in a tarfile."
+  [tin]
+  (when-let [entry (.getNextTarEntry tin)]
+    (cons entry (lazy-seq (tar-entries tin)))))
+
+(defn untar
+  "Takes a tarfile source and untars it to target."
+  [source target]
+  (with-open [tin (TarArchiveInputStream. (io/input-stream (file source)))]
+    (doseq [entry (tar-entries tin) :when (not (.isDirectory entry))
+            :let [output-file (file target (.getName entry))]]
+      (mkdirs (parent output-file))
+      (io/copy tin output-file))))
 
 (defn gunzip
   "Takes a path to a gzip file source and unzips it."
