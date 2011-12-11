@@ -1,5 +1,3 @@
-syntax glob
-
 .lein-failures
 lib
 classes
