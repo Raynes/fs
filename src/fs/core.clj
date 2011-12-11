@@ -30,6 +30,8 @@
         path
         (io/file @cwd path)))))
 
+(defn list-dir
+  "List files and directories under path."
   [path]
   (seq (.list (as-file path))))
 
