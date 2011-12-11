@@ -66,9 +66,6 @@
   [path]
   (.getAbsolutePath (as-file path)))
 
-(defn- strinfify [file]
-  (.getCanonicalPath file))
-
 (defn normpath
   "Return nomralized (canonical) path."
   [path]
