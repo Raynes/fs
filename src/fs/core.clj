@@ -2,8 +2,7 @@
   "File system utilities in Clojure"
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io])
-  (:import java.io.File
-           java.io.FilenameFilter))
+  (:import (java.io File FilenameFilter)
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
 ;; and cannot be changed. This library will provide a way to simulate a
