@@ -66,13 +66,13 @@
   [path]
   (.getAbsolutePath (as-file path)))
 
-(defn normpath
-  "Return nomralized (canonical) path."
+(defn normalized-path
+  "Return normalized (canonical) path."
   [path]
-  (strinfify (as-file path)))
+  (.getCanonicalFile (as-file path)))
 
-(defn basename
-  "Return basename (file part) of path.\n\t(basename \"/a/b/c\") -> \"c\"."
+(defn base-name
+  "Return the base name (final segment/file part) of a path."
   [path]
   (.getName (as-file path)))
 
