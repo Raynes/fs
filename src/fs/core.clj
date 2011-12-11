@@ -76,12 +76,6 @@
   [path]
   (.getName (as-file path)))
 
-
-(defn dirname
-  "Return directory name of path.\n\t(dirname \"a/b/c\") -> \"/a/b\"."
-  [path]
-  (.getParent (io/as-file path)))
-
 (defn directory?
   "Return true if path is a directory."
   [path]
@@ -100,6 +94,11 @@
         i (.lastIndexOf base ".")]
     (when (pos? i)
       (subs base i))))
+
+(defn parent
+  "Return the parent path."
+  [path]
+  (.getParent (as-file path)))
 
   "Return file modification time."
   [path]
