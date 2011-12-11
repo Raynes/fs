@@ -1,6 +1,5 @@
-(ns ^{:doc "File system utilities in Clojure"
-      :author "Miki Tebeka <miki.tebeka@gmail.com>"}
-  fs
+(ns fs
+  "File system utilities in Clojure"
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io])
   (:import java.io.File
