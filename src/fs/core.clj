@@ -163,10 +163,6 @@
   "Create a temporary directory."
   ([] (temp-dir nil))
   ([root]
-(defn cwd
-  "Return the current working directory."
-  []
-  (abspath "."))
    (let [dir (File/createTempFile "-fs-" "" (as-file root))]
      (delete dir)
      (mkdir dir)
