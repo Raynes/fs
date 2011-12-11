@@ -196,10 +196,10 @@
   "Returns files matching glob pattern."
   [pattern]
   (let [parts (split pattern)
-        root (if (= (count parts) 1) "." (apply as-file (butlast parts)))
+        root (if (= (count parts) 1) ["."] (butlast parts))
         regex (glob->regex (last parts))]
     (seq (.listFiles
-          (as-file root)
+          (apply as-file root)
           (reify FilenameFilter
             (accept [_ _ filename]
               (boolean (re-find regex filename))))))))
