@@ -150,9 +150,9 @@
 (defn temp-file 
   "Create a temporary file."
   ([]
-     (tempfile "-fs-" ""))
+     (temp-file "-fs-" ""))
   ([prefix]
-     (tempfile prefix ""))
+     (temp-file prefix ""))
   ([prefix suffix]
      (File/createTempFile prefix suffix))
   ([prefix suffix directory]
@@ -196,7 +196,7 @@
   "Returns files matching glob pattern."
   [pattern]
   (let [parts (split pattern)
-        root (if (= (count parts) 1) "." (apply join (butlast parts)))
+        root (if (= (count parts) 1) "." (apply as-file (butlast parts)))
         regex (glob->regex (last parts))]
     (seq (.listFiles
           (as-file root)
@@ -219,7 +219,7 @@
 (defn- f-base [f]
   (.getName f))
 
-(defn- iterdir* [path]
+(defn- iterate-dir* [path]
   (let [root (as-file path)
         nodes (butlast (iterzip (zip/zipper f-dir? f-children nil root)))]
     (filter f-dir? nodes)))
@@ -233,12 +233,12 @@
 (defn iterate-dir
   "Return a sequence [root dirs files], starting from path"
   [path]
-  (map walk-map-fn (iterdir* path)))
+  (map walk-map-fn (iterate-dir* path)))
 
 (defn walk
   "Walk over directory structure. Calls 'func' with [root dirs files]"
   [func path]
-  (map #(apply func %) (iterdir path)))
+  (map #(apply func %) (iterate-dir path)))
 
 (defn touch
   "Set file modification time (default to now). Returns path."
@@ -305,7 +305,7 @@
   [root]
   (when (directory? root)
     (doseq [path (map #(as-file root %) (.list (as-file root)))]
-      (deltree path)))
+      (delete-dir path)))
   (delete root))
 
 (defn home
