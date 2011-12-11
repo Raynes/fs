@@ -13,8 +13,9 @@
 ; Current working directory (you can't change directory in java)
 (def ^:dynamic *cwd* (.getCanonicalPath (io/as-file ".")))
 
-(defn- as-file [path]
+(defn- as-file
   "The challenge is to work nicely with *cwd*"
+  [path]
   (cond
    (instance? File path) path
    (= path "") (io/as-file "")
