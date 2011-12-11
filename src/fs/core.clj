@@ -76,14 +76,6 @@
   [path]
   (.getName (as-file path)))
 
-(defn extension
-  "Return the file extension.\n\t(extension \"fs.clj\") -> \".clj\"."
-  [path]
-  (let [base (basename path)
-        i (.lastIndexOf base *extension-separator*)]
-    (if (pos? i)
-      (subs base i)
-      "")))
 
 (defn dirname
   "Return directory name of path.\n\t(dirname \"a/b/c\") -> \"/a/b\"."
@@ -101,6 +93,14 @@
   (.isFile (as-file path)))
 
 (defn mtime
+(defn extension
+  "Return the file extension."
+  [path]
+  (let [base (base-name path)
+        i (.lastIndexOf base ".")]
+    (when (pos? i)
+      (subs base i))))
+
   "Return file modification time."
   [path]
   (.lastModified (as-file path)))
