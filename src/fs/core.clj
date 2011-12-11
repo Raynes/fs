@@ -127,7 +127,7 @@
   (seq (.split (str path) (str "\\Q" File/separator "\\E"))))
 
 (defn rename
-  "Rename old-path to new-path."
+  "Rename old-path to new-path. Only works on files."
   [old-path new-path]
   (.renameTo (as-file old-path) (as-file new-path)))
 
