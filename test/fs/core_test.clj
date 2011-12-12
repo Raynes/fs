@@ -1,213 +1,198 @@
 (ns fs.core-test
   (:use fs.core
-        clojure.test)
+        midje.sweet)
+  (:require [clojure.java.io :as io])
   (:import java.io.File))
 
-(def system-tempdir (. System getProperty "java.io.tmpdir"))
-
-(deftest listdir-test
-  (is (not (empty? (listdir ".")))))
-
-(deftest executable?-test
-  (is (executable? ".")))
-
-(deftest readable?-test
-  (is (readable? ".")))
-
-(deftest writeable?-test
-  (is (writeable? ".")))
-
-(deftest delete-test
-  (let [f (tempfile)]
-    (delete f)
-    (is (not (exists? f)))))
-
-(deftest exists?-test
-  (is (exists? ".")))
-
-; FIXME: This test sucks
-(deftest abspath-test
-  (is (> (count (abspath ".")) 2)))
-
-; FIXME: This test sucks
-(deftest normpath-test 
-  (is (> (count (normpath ".")) 2)))
-
-(deftest basename-test
-  (is (= (basename "/a/b/c") "c")))
-
-(deftest dirname-test
-  (is (= (dirname (join "a" "b" "c")) (join "a" "b"))))
-
-(deftest directory?-test
-  (is (directory? ".")))
-
-(deftest file?-test
-  (let [tmp (tempfile)]
-    (is (file? tmp))
-    (delete tmp)))
-
-; FIXME: This test sucks
-(deftest mtime-test
-  (let [tmp (tempfile)]
-    (is (> (mtime tmp) 0))
-    (delete tmp)))
-
-(deftest size-test
-  (let [f (tempfile)]
-    (spit f "abc")
-    (is (= (size f) 3))
-    (delete f)))
-
-(deftest mkdir-test
-  (let [f (tempfile)]
-    (delete f)
-    (mkdir f)
-    (is (directory? f))
-    (deltree f)))
-
-(deftest mkdirs-test
-  (let [f (tempfile)
-        sub (join f "a" "b")]
-    (delete f)
-    (mkdirs sub)
-    (is (directory? sub))
-    (deltree f)))
-
-(deftest join-test
-  (is (= (join "a" "b" "c") (apply str (interpose *separator* "abc")))))
-
-(deftest split-test
-  (is (= (split (apply str (interpose *separator* "abc"))) '("a" "b" "c"))))
-
-(deftest rename-test
-  (let [f (tempfile)
-        new-f (str f "-new")]
-    (rename f new-f)
-    (is (not (exists? f)))
-    (is (exists? new-f))
-    (delete new-f)))
-
-; FIXME: Test all variations of tempfile
-(deftest tempfile-test
-  (let [tmp (tempfile)]
-    (is (file? tmp))
-    (delete tmp)))
-
-; FIXME: Test all variations of tempdir
-(deftest tempdir-test
-  (let [tmp (tempdir)]
-    (is (directory? tmp))
-    (deltree tmp)))
-
-; FIXME: This test sucks
-(deftest cwd-test
-  (is (> (count (cwd)) 3)))
+(def system-tempdir (System/getProperty "java.io.tmpdir"))
 
 (defn create-walk-dir []
-  (let [root (normpath (tempdir))]
-    (mkdir (join root "a"))
-    (mkdir (join root "b"))
-    (spit (join root "1") "1")
-    (spit (join root "a" "2") "1")
-    (spit (join root "b" "3") "1")
+  (let [root (temp-dir)]
+    (mkdir (file root "a"))
+    (mkdir (file root "b"))
+    (spit (file root "1") "1")
+    (spit (file root "a" "2") "1")
+    (spit (file root "b" "3") "1")
     root))
 
-(def walk-atom (atom #{}))
+(fact "Makes paths absolute."
+  (file ".") => @cwd
+  (file "foo") => (io/file @cwd "foo"))
 
-(defn walk-fn [root dirs files]
-  (swap! walk-atom conj [(normpath root) dirs files]))
+(fact (list-dir ".") => (has every? string?))
 
-(deftest walk-test
- (let [root (create-walk-dir)]
-   (walk root walk-fn)
-   (let [result @walk-atom]
-     (is (= result
-            #{[root #{"b" "a"} #{"1"}]
-              [(join root "a") #{} #{"2"}]
-              [(join root "b") #{} #{"3"}]}))
-     (deltree root))))
+;; Want to change these files to be tempfiles at some point.
+(against-background
+ [(before :contents
+          (let [f (io/file "test/fs/testfiles/bar")]
+            (.setExecutable f false)
+            (.setReadable f false)
+            (.setWritable f false)))
+  (after :contents
+         (let [f (io/file "test/fs/testfiles/bar")]
+           (.setExecutable f true)
+           (.setReadable f true)
+           (.setWritable f true)))]
+ (fact
+   (executable? "test/fs/testfiles/foo") => true
+   (executable? "test/fs/testfiles/bar") => false)
 
-(deftest copy-test
-  (let [from (tempfile)
-        to (tempfile)
+ (fact
+   (readable? "test/fs/testfiles/foo") => true
+   (readable? "test/fs/testfiles/bar") => false)
+
+ (fact
+   (writeable? "test/fs/testfiles/foo") => true
+   (writeable? "test/fs/testfiles/bar") => false))
+
+(fact
+  (file? "test/fs/testfiles/foo") => true
+  (file? ".") => false)
+
+(fact
+  (exists? "test/fs/testfiles/foo") => true
+  (exists? "ewjgnr4ig43j") => false)
+
+(fact
+  (let [f (io/file "test/fs/testfiles/baz")]
+    (.createNewFile f)
+    (delete f) =not=> (exists? f)))
+
+(fact
+  (directory? ".") => true
+  (directory? "test/fs/testfiles/foo") => false)
+
+(fact
+  (file? ".") => false
+  (file? "test/fs/testfiles/foo") => true)
+
+(fact
+  (let [tmp (temp-file)]
+    (exists? tmp) => true
+    (file? tmp) => true
+    (delete tmp)))
+
+(fact
+  (let [tmp (temp-dir)]
+    (exists? tmp) => true
+    (directory? tmp) => true
+    (delete tmp)))
+
+(fact
+  (absolute-path "foo") => (str (io/file @cwd "foo")))
+
+(fact
+  (normalized-path ".") => @cwd)
+
+(fact
+  (base-name "foo/bar") => "bar")
+
+(fact
+  (let [tmp (temp-file)]
+    (> (mod-time tmp) 0) => true
+    (delete tmp)))
+
+(fact
+  (let [f (temp-file)]
+    (spit f "abc")
+    (size f) => 3
+    (delete f)))
+
+(fact
+  (let [root (create-walk-dir)
+        result (delete-dir root)]
+    (exists? root) => false
+    root => result))
+
+(fact
+  (let [f (temp-file)]
+    (delete f)
+    (mkdir f)
+    (directory? f) => true
+    (delete-dir f)))
+
+(fact
+  (let [f (temp-file)
+        sub (file f "a" "b")]
+    (delete f)
+    (mkdirs sub)
+    (directory? sub) => true
+    (delete-dir f)))
+
+(fact
+  (split (file "test/fs")) => (has-suffix ["test" "fs"]))
+
+(fact
+  (let [f (temp-file)
+        new-f (str f "-new")]
+    (rename f new-f)
+    (exists? f) => false
+    (exists? new-f) => true
+    (delete new-f)))
+
+(fact
+  (let [root (create-walk-dir)]
+    (walk vector root) => (contains [[root #{"b" "a"} #{"1"}]
+                                     [(file root "a") #{} #{"2"}]
+                                     [(file root "b") #{} #{"3"}]])
+    (delete-dir root)))
+
+(fact
+  (let [from (temp-file)
+        to (temp-file)
         data "What's up Doc?"]
     (delete to)
     (spit from data)
     (copy from to)
-    (is (= (slurp from) (slurp to)))
+    (slurp from) => (slurp to)
     (delete from)
     (delete to)))
 
-(deftest touch-test
-    (let [f (tempfile)
-          t (mtime f)]
-      (Thread/sleep 1000)
-      (touch f)
-      (is (> (mtime f) t))
-      (let [t1 3000]
-        (touch f t1)
-        (is (= (mtime f) t1)))
-      (delete f)))
-
-(deftest test-chmod
-  (let [f (tempfile)]
-    ; Skip "-x" on windows, since it'll never work.
-    ; (see http://java.sun.com/developer/technicalArticles/J2SE/Desktop/javase6/enhancements/ )
-    (when (.setExecutable (new File f) false)
-      (chmod "-x" f)
-      (is (not (executable? f))))
-    (chmod "+x" f)
-    (is (executable? f))
+(fact
+  (let [f (temp-file)
+        t (mod-time f)]
+    (Thread/sleep 1000)
+    (touch f)
+    (> (mod-time f) t) => true
+    (let [t2 3000]
+      (touch f t2)
+      (mod-time f) => t2)
     (delete f)))
 
-(deftest test-copy-tree
+(fact
+  (let [f (temp-file)]
+    (chmod "+x" f)
+    (executable? f) => true
+    (when-not (re-find #"Windows" (System/getProperty "os.name"))
+      (chmod "-x" f)
+      (executable? f) => false)
+    (delete f)))
+
+(fact
   (let [from (create-walk-dir)
-        to (normpath (tempdir))]
-    (swap! walk-atom (fn [_] #{}))
-    (let [path (copy-tree from to)
-          dest (join to (basename from))]
-      (is (= (normpath path) (normpath dest)))
-      (walk to walk-fn)
-      (let [result @walk-atom]
-        (is (= result
-               #{[to #{(basename from)} #{}]
-                 [dest #{"b" "a"} #{"1"}]
-                 [(join dest "a") #{} #{"2"}]
-                 [(join dest "b") #{} #{"3"}]})))
-      (deltree from)
-      (deltree to))))
+        to (temp-dir)
+        path (copy-dir from to)
+        dest (file to (base-name from))]
+    path => dest
+    (walk vector to) => (contains [[to #{(base-name from)} #{}]
+                                   [dest #{"b" "a"} #{"1"}]
+                                   [(file dest "a") #{} #{"2"}]
+                                   [(file dest "b") #{} #{"3"}]])
+    (delete-dir from)
+    (delete-dir to)))
 
-(deftest test-deltree
-  (let [root (create-walk-dir)
-        result (deltree root)]
-    (is (not (exists? root)))
-    (is (= root result))))
-
-; Skipping on windows, which has somewhat wacky
-; and complicated ideas about what HOME means.
 (when (System/getenv "HOME")
-  (deftest test-home
-    (is (= (home) (System/getenv "HOME")))))
+  (fact
+    (home) => (System/getenv "HOME")))
 
-(deftest text-extension
-  (is (= (extension "fs.clj") ".clj"))
-  (is (= (extension "fs.") "."))
-  (is (= (extension "/path/to/fs") ""))
-  (is (= (extension "fs.clj.bak") ".bak"))
-  (is (= (extension "") "")))
+(fact
+  (extension "fs.clj") => ".clj"
+  (extension "fs.") => "."
+  (extension "/path/to/fs") => nil
+  (extension "fs.clj.bak") => ".bak"
+  (extension "") => nil)
 
-(deftest test-chdir
-  (let [path system-tempdir]
-    (chdir path)
-    (is (= (normpath *cwd*) (normpath path)))
-    (is (= (normpath (cwd)) (normpath path)))))
-
-(deftest test-with-cwd
-  (with-cwd system-tempdir
-    (is (= (normpath (cwd)) (normpath system-tempdir))))
-  (is (= (cwd) *cwd*)))
-
-(deftest test-file
-  ; Test that we work with java.io.File objects as well
-  (is (directory? (File. system-tempdir))))
+(fact
+  (let [old @cwd]
+    (chdir "test")
+    @cwd => (io/file old "test")))
