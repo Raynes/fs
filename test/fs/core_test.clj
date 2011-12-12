@@ -185,12 +185,15 @@
   (fact
     (home) => (System/getenv "HOME")))
 
-(fact
-  (extension "fs.clj") => ".clj"
-  (extension "fs.") => "."
-  (extension "/path/to/fs") => nil
-  (extension "fs.clj.bak") => ".bak"
-  (extension "") => nil)
+(tabular
+  (fact (extension ?file) => ?ext)
+  
+    ?file            ?ext
+    "fs.clj"        ".clj"
+    "fs."           "."
+    "fs.clj.bak"    ".bak"
+    "/path/to/fs"   nil
+    ""              nil )
 
 (fact
   (let [old @cwd]
