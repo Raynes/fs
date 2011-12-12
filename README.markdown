@@ -20,7 +20,7 @@ This library was originally devised and maintained by Miki Tebeka, but [I](https
 
 * [Miki Tebeka](mailto:miki.tebeka@gmail.com)
 * [Justin Kramer](mailto:jkkramer@gmail.com)
-* Steve Miner
+* [Steve Miner](mailto:steveminer@gmail.com)
 * [Bronsa](mailto:brobronsa@gmail.com)
 * [Anthony Grimes](https://github.com/Raynes)
 
