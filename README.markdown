@@ -8,7 +8,11 @@ The library is simple. It is just a collection of functions that do things. The 
 
 Use Leiningen to get fs: `:dependencies [[fs "1.0.0"]]`.
 
-This is 100% a utility library. If you have something useful that it doesn't already have, open a pull request, because I probably want it. It is *not* an I/O utility library. We should try to keep things limited to file system activities.
+This is 100% a utility library. If you have something useful that it doesn't already have, open a pull request, because I probably want it. Make sure you include tests. 
+
+fs is *not* an I/O utility library. We should try to keep things limited to file system activities.
+
+We also have Marginalia [docs](http://raynes.github.com/fs/).
 
 ## Contributors
 
