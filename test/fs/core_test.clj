@@ -186,14 +186,34 @@
     (home) => (System/getenv "HOME")))
 
 (tabular
+  (fact (split-ext ?file) => ?ext)
+  
+    ?file            ?ext
+    "fs.clj"        ["fs" "clj"]
+    "fs."           ["fs" ""]
+    "fs.clj.bak"    ["fs.clj" "bak"]
+    "/path/to/fs"   ["fs" nil]
+    ""              ["fs" nil])
+
+(tabular
   (fact (extension ?file) => ?ext)
   
     ?file            ?ext
-    "fs.clj"        ".clj"
-    "fs."           "."
-    "fs.clj.bak"    ".bak"
+    "fs.clj"        "clj"
+    "fs."           ""
+    "fs.clj.bak"    "bak"
     "/path/to/fs"   nil
-    ""              nil )
+    ""              nil)
+
+(tabular
+  (fact (name ?file) => ?ext)
+  
+    ?file            ?ext
+    "fs.clj"        "fs"
+    "fs."           "fs"
+    "fs.clj.bak"    "fs.clj"
+    "/path/to/fs"   "fs"
+    ""              "fs")
 
 (fact
   (let [old @cwd]

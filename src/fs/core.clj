@@ -1,7 +1,9 @@
 (ns fs.core
   "File system utilities in Clojure"
+  (:refer-clojure :exclude [name])
   (:require [clojure.zip :as zip]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [clojure.string :as string])
   (:import (java.io File FilenameFilter)
            (java.util.zip ZipFile GZIPInputStream)
            org.apache.commons.compress.archivers.tar.TarArchiveInputStream))
@@ -86,13 +88,23 @@
   [path]
   (.isFile (file path)))
 
-(defn extension
-  "Return the file extension."
+(defn split-ext
+  "Returns a vector of [filename extension]"
   [path]
   (let [base (base-name path)
         i (.lastIndexOf base ".")]
-    (when (pos? i)
-      (subs base i))))
+    (if (pos? i)
+      (let [[name ext] (split-at i base)]
+        [(string/join name) (-> ext rest string/join)])
+      [base nil])))
+
+(defn extension
+  "Return the extension part of a file."
+  [path] (last (split-ext path)))
+
+(defn name
+  "Return the name part of a file."
+  [path] (first (split-ext path)))
 
 (defn parent
   "Return the parent path."
