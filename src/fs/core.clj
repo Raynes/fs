@@ -317,7 +317,7 @@
 (defn chdir
   "Change directory. This only changes the value of cwd
    (you can't change directory in Java)."
-  [path] (swap! cwd (constantly path)))
+  [path] (swap! cwd (constantly (file path))))
 
 (defn unzip
   "Takes the path to a zipfile source and unzips it to target-dir."
