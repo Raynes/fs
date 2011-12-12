@@ -1,4 +1,5 @@
-.lein-failures
+.lein*
+*.jar
 lib
 classes
 pom.xml
