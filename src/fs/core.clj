@@ -25,11 +25,10 @@
    an absolute path, makes it absolutely by creating a new File object out of
    the paths and cwd."
   [path & paths]
-  (when path
-    (let [path (apply io/file (cons (if (= path ".") @cwd path) paths))]
-      (if (.isAbsolute path)
-        path
-        (io/file @cwd path)))))
+  (when-let [path (apply io/file (if (= path ".") @cwd path) paths)]
+    (if (.isAbsolute path)
+      path
+      (io/file @cwd path))))
 
 (defn list-dir
   "List files and directories under path."
