@@ -196,3 +196,23 @@
   (let [old @cwd]
     (chdir "test")
     @cwd => (io/file old "test")))
+
+(against-background
+ [(before :contents (chdir "fs/testfiles"))]
+ 
+ (fact
+   (unzip "ggg.zip" "zggg")
+   (exists? "zggg/ggg") => true
+   (exists? "zggg/hhh/jjj") => true
+   (delete-dir "zggg"))
+ 
+ (fact
+   (untar "ggg.tar" "zggg")
+   (exists? "zggg/ggg") => true
+   (exists? "zggg/hhh/jjj") => true
+   (delete-dir "zggg"))
+
+ (fact
+   (gunzip "ggg.gz" "ggg")
+   (exists? "ggg") => true
+   (delete "ggg")))
