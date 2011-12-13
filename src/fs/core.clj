@@ -110,7 +110,7 @@
 (defn parent
   "Return the parent path."
   [path]
-  (.getParent (file path)))
+  (.getParentFile (file path)))
 
 (defn mod-time
   "Return file modification time."
@@ -374,3 +374,14 @@
   ([source target]
      (io/copy (-> source file io/input-stream BZip2CompressorInputStream.)
               (file target))))
+
+(defn parents
+  "Get all the parent directories of a path."
+  [f]
+  (when-let [parent (parent (file f))]
+    (cons parent (lazy-seq (parents parent)))))
+
+(defn child-of?
+  "Takes two paths and checks to see if the first path is a parent
+   of the second."
+  [p c] (some #{(file p)} (parents c)))

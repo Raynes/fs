@@ -244,3 +244,13 @@
    (bunzip2 "bbb.bz2" "bbb")
    (exists? "bbb") => true
    (delete "bbb")))
+
+(fact
+  (parents "/foo/bar/baz/") => (in-any-order [(file "/foo")
+                                              (file "/foo/bar")
+                                              (file "/")])
+  (parents "/") => nil)
+
+(fact
+  (child-of? "/foo/bar" "/foo/bar/baz") => truthy
+  (child-of? "/foo/bar/baz" "/foo/bar") => falsey)
