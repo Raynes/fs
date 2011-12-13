@@ -265,6 +265,15 @@
   [func path]
   (map #(apply func %) (iterate-dir path)))
 
+(defn dir-seq
+  "Return a flattened sequence of all the files within (and including)
+  the directory pointed by path. Operates recursively. If path is
+  pointing to a file, the file itself is returned in a sequence."
+  [path]
+  (tree-seq #(directory? %)
+            #(map file (.listFiles %))
+            (file path)))
+
 (defn touch
   "Set file modification time (default to now). Returns path."
   [path & time]
