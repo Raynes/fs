@@ -238,4 +238,9 @@
  (fact
    (gunzip "ggg.gz" "ggg")
    (exists? "ggg") => true
-   (delete "ggg")))
+   (delete "ggg"))
+
+ (fact
+   (bunzip2 "bbb.bz2" "bbb")
+   (exists? "bbb") => true
+   (delete "bbb")))
