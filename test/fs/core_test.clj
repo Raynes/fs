@@ -184,7 +184,20 @@
 
 (when (System/getenv "HOME")
   (fact
-    (home) => (System/getenv "HOME")))
+   (let [env-home (io/file (System/getenv "HOME"))]
+     (home) => env-home
+     (home "") => env-home
+     (home (System/getProperty "user.name")) => env-home
+     (file "~") => env-home
+     (file "~/") => env-home
+     (file "~foo/bar.txt") => (file (parent env-home) "foo" "bar.txt"))))
+
+
+(fact
+ (let [username (System/getProperty "user.name")
+       foo (io/file (System/getProperty "user.home") "foo.bar")]
+   (file "~/foo.bar") => foo
+   (file (str "~" username) "foo.bar") => foo))
 
 (tabular
   (fact (split-ext ?file) => ?ext)
