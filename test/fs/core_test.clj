@@ -17,7 +17,8 @@
 
 (fact "Makes paths absolute."
   (file ".") => @cwd
-  (file "foo") => (io/file @cwd "foo"))
+  (file "foo") => (io/file @cwd "foo")
+  (file "~/foo") => (io/file (System/getProperty "user.home") "foo"))
 
 (fact (list-dir ".") => (has every? string?))
 

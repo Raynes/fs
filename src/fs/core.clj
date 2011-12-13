@@ -20,6 +20,17 @@
              in this library."}
   cwd (atom (.getCanonicalFile (io/file "."))))
 
+(defn home
+  "User home directory"
+  [] (System/getProperty "user.home"))
+
+(defn- expand-path [path]
+  (let [path (str path)]
+    (cond
+     (= path ".") @cwd
+     (.startsWith path "~") (str (home) (subs path 1))
+     :else path)))
+
 ;; Library functions will call this function on paths/files so that
 ;; we get the cwd effect on them.
 (defn file
@@ -28,7 +39,7 @@
    an absolute path, makes it absolutely by creating a new File object out of
    the paths and cwd."
   [path & paths]
-  (when-let [path (apply io/file (if (= path ".") @cwd path) paths)]
+  (when-let [path (apply io/file (expand-path path) paths)]
     (if (.isAbsolute path)
       path
       (io/file @cwd path))))
@@ -321,10 +332,6 @@
     (doseq [path (map #(file root %) (.list (file root)))]
       (delete-dir path)))
   (delete root))
-
-(defn home
-  "User home directory"
-  [] (System/getProperty "user.home"))
 
 (defn chdir
   "Change directory. This only changes the value of cwd
