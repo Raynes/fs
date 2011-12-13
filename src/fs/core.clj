@@ -6,7 +6,8 @@
             [clojure.string :as string])
   (:import (java.io File FilenameFilter)
            (java.util.zip ZipFile GZIPInputStream)
-           org.apache.commons.compress.archivers.tar.TarArchiveInputStream))
+           org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+           org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
 ;; and cannot be changed. This library will provide a way to simulate a
@@ -365,4 +366,11 @@
   ([source] (gunzip source (name source)))
   ([source target]
      (io/copy (-> source file io/input-stream GZIPInputStream.)
+              (file target))))
+
+(defn bunzip2
+  "Takes a path to a bzip2 file source and uncompresses it."
+  ([source] (bunzip2 source (name source)))
+  ([source target]
+     (io/copy (-> source file io/input-stream BZip2CompressorInputStream.)
               (file target))))
