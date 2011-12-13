@@ -20,15 +20,22 @@
              in this library."}
   cwd (atom (.getCanonicalFile (io/file "."))))
 
+(let [homedir (io/file (System/getProperty "user.home"))
+      usersdir (.getParent homedir)]
 (defn home
   "User home directory"
-  [] (System/getProperty "user.home"))
+  ([] homedir)
+  ([user] (if (empty? user) homedir (io/file usersdir user)))))
 
 (defn- expand-path [path]
   (let [path (str path)]
     (cond
      (= path ".") @cwd
-     (.startsWith path "~") (str (home) (subs path 1))
+     (.startsWith path "~") 
+     (let [sep (.indexOf path File/separator)]
+       (if (neg? sep)
+         (home (subs path 1))
+         (io/file (home (subs path 1 sep)) (subs path (inc sep)))))
      :else path)))
 
 ;; Library functions will call this function on paths/files so that
