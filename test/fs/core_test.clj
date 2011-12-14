@@ -268,3 +268,9 @@
 (fact
   (child-of? "/foo/bar" "/foo/bar/baz") => truthy
   (child-of? "/foo/bar/baz" "/foo/bar") => falsey)
+
+(fact
+  (path-ns "foo/bar/baz_quux.clj") => 'foo.bar.baz-quux)
+
+(fact
+  (str (ns-path 'foo.bar.baz-quux)) => (has-suffix "foo/bar/baz_quux.clj"))

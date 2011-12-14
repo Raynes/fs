@@ -399,3 +399,22 @@
   "Takes two paths and checks to see if the first path is a parent
    of the second."
   [p c] (some #{(file p)} (parents c)))
+
+(defn ns-path
+  "Takes a namespace symbol and creates a path to it. Replaces hypens with
+   underscores. Assumes the path should be relative to cwd."
+  [n]
+  (file
+   (str (.. (str n)
+            (replace \- \_)
+            (replace \. \/))
+        ".clj")))
+
+(defn path-ns
+  "Takes a path to a Clojure file and constructs a namespace symbol
+   out of the path."
+  [path]
+  (symbol
+   (.. (.replaceAll (str path) "\\.clj" "")
+       (replace \_ \-)
+       (replace \/ \.))))
