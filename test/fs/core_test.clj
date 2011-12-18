@@ -17,8 +17,18 @@
 
 (fact "Makes paths absolute."
   (file ".") => @cwd
-  (file "foo") => (io/file @cwd "foo")
-  (file "~/foo") => (io/file (System/getProperty "user.home") "foo"))
+  (file "foo") => (io/file @cwd "foo"))
+
+(fact "Expands path to current user."
+  (let [user (System/getProperty "user.home")]
+    (expand-home "~") => (file user)
+    (expand-home "~/foo") => (file user "foo")))
+
+(fact "Expands to given user."
+  (let [user (System/getProperty "user.home")
+        name (System/getProperty "user.name")]
+    (expand-home (str "~" name)) => (file user)
+    (expand-home (format "~%s/foo" name)) => (file user "foo")))
 
 (fact (list-dir ".") => (has every? string?))
 
@@ -187,17 +197,7 @@
    (let [env-home (io/file (System/getenv "HOME"))]
      (home) => env-home
      (home "") => env-home
-     (home (System/getProperty "user.name")) => env-home
-     (file "~") => env-home
-     (file "~/") => env-home
-     (file "~foo/bar.txt") => (file (parent env-home) "foo" "bar.txt"))))
-
-
-(fact
- (let [username (System/getProperty "user.name")
-       foo (io/file (System/getProperty "user.home") "foo.bar")]
-   (file "~/foo.bar") => foo
-   (file (str "~" username) "foo.bar") => foo))
+     (home (System/getProperty "user.name")) => env-home)))
 
 (tabular
   (fact (split-ext ?file) => ?ext)
