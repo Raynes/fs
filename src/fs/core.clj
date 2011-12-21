@@ -30,22 +30,6 @@
     ([] homedir)
     ([user] (if (empty? user) homedir (io/file usersdir user)))))
 
-(defn expand-home
-  "If path begins with a tilde (~), expand the tilde to the value
-   of the user.home system property. If the path begins with a tilde
-   immediately followed by some characters, they are assumed to be a
-   username. This is expanded to the path to that user's home directory.
-   This is (naively) assumed to be a directory with the same name as the
-   user relative to the parent of the current value of user.home."
-  [path]
-  (let [path (str path)]
-    (if (.startsWith path "~") 
-      (let [sep (.indexOf path File/separator)]
-        (if (neg? sep)
-          (home (subs path 1))
-          (io/file (home (subs path 1 sep)) (subs path (inc sep)))))
-      path)))
-
 ;; Library functions will call this function on paths/files so that
 ;; we get the cwd effect on them.
 (defn file
@@ -63,10 +47,76 @@
       path
       (io/file @cwd path))))
 
+(defn split
+  "Split path to components. If limit is provided, produces
+  only the first n splits, with the remainder of the path
+  appended to the last section."
+  ([ path ]
+     (seq (.split (str path) (str "\\Q" File/separator "\\E"))))
+  ([ path limit ]
+     (seq (.split (str path) (str "\\Q" File/separator "\\E") limit))))
+
+(defn- after-tilde
+  "Returns the canonical part of the given string after the first '~' character,
+   or nil if no tilde is present."
+
+  ;; Interesting because it will
+  ;; correct funny casing, turn '/' to '\' on windows, and generally
+  ;; accomodate whatever quirks the Java Filesystem is supposed to handle.
+
+  [ path ]
+  (let [
+        path-file (file path)
+        canonical-path (.getCanonicalPath path-file)
+        remaining-path (second (.split canonical-path "~" 2))
+        ]
+    remaining-path))
+
+(defn- tilde-path-to-file
+  "ASSUMING that we're given a string beginning with ~, attempts to
+   parse it as ~[name][SEP remaining path]
+
+   ~  -> user.home
+   ~dave -> user \"gribbl\"'s home (say /home/gribbl)
+   ~/gribbl -> user.home/gribbl
+   ~dave/gribbl -> /home/dave/gribbl
+
+   Will return a File
+  "
+  [ path ]
+  (let [
+        name-sep-path (after-tilde path)
+        [ user-name relative-path ] (split name-sep-path 2)
+        ]
+    (cond
+     (string/blank? name-sep-path) (home)
+     (string/blank? relative-path) (home user-name)
+     (string/blank? user-name) (io/file (home) relative-path)
+     :else (io/file (home user-name) relative-path)
+     )))
+
+(defn expand-home
+  "If path begins with a tilde (~), expand the tilde to the value
+   of the user.home system property. If the path begins with a tilde
+   immediately followed by some characters, they are assumed to be a
+   username. This is expanded to the path to that user's home directory.
+   This is (naively) assumed to be a directory with the same name as the
+   user relative to the parent of the current value of user.home."
+  [path]
+  (let [path (str path)]
+    (if (.startsWith path "~")
+      (tilde-path-to-file path)
+      path)))
+
 (defn list-dir
-  "List files and directories under path."
+  "List files and directories under path, returning their basenames only."
   [path]
   (seq (.list (file path))))
+
+(defn ls
+  "List files and directories under path, returning absolute paths."
+  [path]
+  (map #(.getPath %) (.listFiles (file path))))
 
 (defn executable?
   "Return true if path is executable."
@@ -163,11 +213,6 @@
   [path]
   (.mkdirs (file path))
   path)
-
-(defn split
-  "Split path to componenets."
-  [path]
-  (seq (.split (str path) (str "\\Q" File/separator "\\E"))))
 
 (defn rename
   "Rename old-path to new-path. Only works on files."
@@ -297,7 +342,9 @@
   'mode' can be any combination of \"r\" (readable) \"w\" (writable) and \"x\"
   (executable). It should be prefixed with \"+\" to set or \"-\" to unset. And
   optional prefix of \"u\" causes the permissions to be set for the owner only.
-  
+
+   -x and -w probably (and harmlessly) silently fail on windows file systems.
+
   Examples:
   (chmod \"+x\" \"/tmp/foo\") -> Sets executable for everyone
   (chmod \"u-wx\" \"/tmp/foo\") -> Unsets owner write and executable"

@@ -6,6 +6,9 @@
 
 (def system-tempdir (System/getProperty "java.io.tmpdir"))
 
+(def current-root-dir
+  (last (parents @cwd)))
+
 (defn create-walk-dir []
   (let [root (temp-dir)]
     (mkdir (file root "a"))
@@ -14,6 +17,13 @@
     (spit (file root "a" "2") "1")
     (spit (file root "b" "3") "1")
     root))
+
+(defmacro unless-windows [ name & forms ]
+  `(if (re-find #"Windows" (System/getProperty "os.name"))
+
+     (println (str "SKIPPING TEST ON WINDOWS " ~name))
+
+     (do ~@forms)))
 
 (fact "Makes paths absolute."
   (file ".") => @cwd
@@ -24,13 +34,17 @@
     (expand-home "~") => (file user)
     (expand-home "~/foo") => (file user "foo")))
 
-(fact "Expands to given user."
-  (let [user (System/getProperty "user.home")
-        name (System/getProperty "user.name")]
-    (expand-home (str "~" name)) => (file user)
-    (expand-home (format "~%s/foo" name)) => (file user "foo")))
+(unless-windows "Expand ~user/foo"
+  (fact "Expands to given user."
+        (let [user (System/getProperty "user.home")
+              name (System/getProperty "user.name")]
+          (expand-home (str "~" name)) => (file user)
+          (expand-home (format "~%s/foo" name)) => (file user "foo"))))
 
 (fact (list-dir ".") => (has every? string?))
+
+(fact "We should be able to see the results of ls from directories other than cwd"
+      (ls "testfiles") => (has every? exists?))
 
 ;; Want to change these files to be tempfiles at some point.
 (against-background
@@ -44,13 +58,21 @@
            (.setExecutable f true)
            (.setReadable f true)
            (.setWritable f true)))]
- (fact
-   (executable? "test/fs/testfiles/foo") => true
-   (executable? "test/fs/testfiles/bar") => false)
 
+
+ (when (.setExecutable (io/file "test/fs/testfiles/bar") false)
+  (fact
+   (executable?  "test/fs/testfiles/bar") => false))
+
+ (when (.setReadable (io/file "test/fs/testfiles/bar") false)
+  (fact
+   (readable? "test/fs/testfiles/bar") => false))
+ 
  (fact
-   (readable? "test/fs/testfiles/foo") => true
-   (readable? "test/fs/testfiles/bar") => false)
+  (executable? "test/fs/testfiles/foo") => true)
+ 
+ (fact
+   (readable? "test/fs/testfiles/foo") => true)
 
  (fact
    (writeable? "test/fs/testfiles/foo") => true
@@ -134,6 +156,9 @@
   (split (file "test/fs")) => (has-suffix ["test" "fs"]))
 
 (fact
+ (last (split (file "/one/two/three/four") 2)) =>(has-suffix (str (io/file "two/three/four"))))
+
+(fact
   (let [f (temp-file)
         new-f (str f "-new")]
     (rename f new-f)
@@ -174,23 +199,27 @@
   (let [f (temp-file)]
     (chmod "+x" f)
     (executable? f) => true
-    (when-not (re-find #"Windows" (System/getProperty "os.name"))
-      (chmod "-x" f)
-      (executable? f) => false)
     (delete f)))
 
+(unless-windows "Set chmod -x"
+  (fact
+   (let [f (temp-file)]
+    (chmod "-x" f)
+    (executable? f) => false
+    (delete f))))
+
 (fact
-  (let [from (create-walk-dir)
-        to (temp-dir)
-        path (copy-dir from to)
-        dest (file to (base-name from))]
-    path => dest
-    (walk vector to) => (contains [[to #{(base-name from)} #{}]
-                                   [dest #{"b" "a"} #{"1"}]
-                                   [(file dest "a") #{} #{"2"}]
-                                   [(file dest "b") #{} #{"3"}]])
-    (delete-dir from)
-    (delete-dir to)))
+ (let [from (create-walk-dir)
+       to (temp-dir)
+       path (copy-dir from to)
+       dest (file to (base-name from))]
+   path => dest
+   (walk vector to) => (contains [[to #{(base-name from)} #{}]
+                                  [dest #{"b" "a"} #{"1"}]
+                                  [(file dest "a") #{} #{"2"}]
+                                  [(file dest "b") #{} #{"3"}]])
+   (delete-dir from)
+   (delete-dir to)))
 
 (when (System/getenv "HOME")
   (fact
@@ -259,11 +288,11 @@
    (exists? "bbb") => true
    (delete "bbb")))
 
+
 (fact
-  (parents "/foo/bar/baz/") => (in-any-order [(file "/foo")
-                                              (file "/foo/bar")
-                                              (file "/")])
-  (parents "/") => nil)
+ (map base-name (take 2 (parents "/foo/bar/baz/"))) => ["bar" "foo"]
+ (base-name (last (parents "/foo/bar/baz/"))) => ""
+ (parents current-root-dir) => nil)
 
 (fact
   (child-of? "/foo/bar" "/foo/bar/baz") => truthy
@@ -273,4 +302,4 @@
   (path-ns "foo/bar/baz_quux.clj") => 'foo.bar.baz-quux)
 
 (fact
-  (str (ns-path 'foo.bar.baz-quux)) => (has-suffix "foo/bar/baz_quux.clj"))
+  (split (ns-path 'foo.bar.baz-quux)) => (has-suffix "foo" "bar" "baz_quux.clj"))
