@@ -34,16 +34,14 @@
 
 ;; Want to change these files to be tempfiles at some point.
 (against-background
- [(before :contents
-          (let [f (io/file "test/fs/testfiles/bar")]
-            (.setExecutable f false)
-            (.setReadable f false)
-            (.setWritable f false)))
-  (after :contents
-         (let [f (io/file "test/fs/testfiles/bar")]
-           (.setExecutable f true)
-           (.setReadable f true)
-           (.setWritable f true)))]
+ [(around :contents (let [f (io/file "test/fs/testfiles/bar")]
+                      (.setExecutable f false)
+                      (.setReadable f false)
+                      (.setWritable f false)
+                      ?form
+                      (.setExecutable f true)
+                      (.setReadable f true)
+                      (.setWritable f true)))]
  (fact
    (executable? "test/fs/testfiles/foo") => true
    (executable? "test/fs/testfiles/bar") => false)
