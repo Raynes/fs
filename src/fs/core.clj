@@ -275,12 +275,14 @@
     [root dirs files]))
 
 (defn iterate-dir
-  "Return a sequence [root dirs files], starting from path"
+  "Return a sequence [root dirs files], starting from 'path' in depth-first order"
   [path]
   (map walk-map-fn (iterate-dir* path)))
 
 (defn walk
-  "Walk over directory structure. Calls 'func' with [root dirs files]"
+  "Lazily walk depth-first over the directory structure starting at
+  'path' calling 'func' with three arguments [root dirs files].
+  Returns a sequence of the results." 
   [func path]
   (map #(apply func %) (iterate-dir path)))
 
