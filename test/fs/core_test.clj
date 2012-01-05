@@ -131,6 +131,13 @@
 (fact
   (split (file "test/fs")) => (has-suffix ["test" "fs"]))
 
+(when unix-root
+  (fact
+   (split (file "/tmp/foo/bar.txt")) => '("/" "tmp" "foo" "bar.txt")
+   (split (file "/")) => '("/")
+   (split "/") => '("/")
+   (split "") => '("")))
+
 (fact
   (let [f (temp-file)
         new-f (str f "-new")]

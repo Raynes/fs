@@ -164,10 +164,20 @@
   (.mkdirs (file path))
   path)
 
+(def unix-root "The root of a unix system is /, nil on Windows"
+  (when (= File/separator "/") File/separator))
+
+
 (defn split
-  "Split path to componenets."
+  "Split path to components."
   [path]
-  (seq (.split (str path) (str "\\Q" File/separator "\\E"))))
+  (let [pathstr (str path)
+        jregx (str "\\Q" File/separator "\\E")]
+    (cond (= pathstr unix-root) (list unix-root)
+          (and unix-root (.startsWith pathstr unix-root))
+          ;; unix absolute path
+            (cons unix-root (seq (.split (subs pathstr 1) jregx)))
+          :else (seq (.split pathstr jregx)))))
 
 (defn rename
   "Rename old-path to new-path. Only works on files."
