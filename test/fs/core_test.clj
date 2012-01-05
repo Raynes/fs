@@ -94,7 +94,10 @@
   (normalized-path ".") => @cwd)
 
 (fact
-  (base-name "foo/bar") => "bar")
+  (base-name "foo/bar") => "bar"
+  (base-name "foo/bar.txt" true) => "bar"
+  (base-name "bar.txt" ".txt") => "bar"
+  (base-name "foo/bar.txt" ".png") => "bar.txt")
 
 (fact
   (let [tmp (temp-file)]
