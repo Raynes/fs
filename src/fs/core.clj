@@ -105,9 +105,18 @@
   (.getCanonicalFile (file path)))
 
 (defn base-name
-  "Return the base name (final segment/file part) of a path."
-  [path]
-  (.getName (file path)))
+  "Return the base name (final segment/file part) of a path.
+If optional 'trim-ext' is a string and the path ends with that string, it is trimmed.
+If 'trim-ext' is true, any extension is trimmed."
+  ([path] (.getName (file path)))
+  ([path trim-ext] 
+     (let [base (.getName (file path))]
+       (cond (string? trim-ext) (if (.endsWith base trim-ext)
+                                  (subs base 0 (- (.length base) (.length trim-ext)))
+                                  base)
+             trim-ext (let [dot (.lastIndexOf base ".")]
+                        (if (pos? dot) (subs base 0 dot) base))
+             :else base))))
 
 (defn directory?
   "Return true if path is a directory."
