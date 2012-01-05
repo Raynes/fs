@@ -120,13 +120,12 @@
   (.isFile (file path)))
 
 (defn split-ext
-  "Returns a vector of [filename extension]"
+  "Returns a vector of [name extension]."
   [path]
   (let [base (base-name path)
         i (.lastIndexOf base ".")]
     (if (pos? i)
-      (let [[name ext] (split-at i base)]
-        [(string/join name) (-> ext rest string/join)])
+      [(subs base 0 i) (subs base i)]
       [base nil])))
 
 (defn extension
@@ -166,7 +165,6 @@
 
 (def unix-root "The root of a unix system is /, nil on Windows"
   (when (= File/separator "/") File/separator))
-
 
 (defn split
   "Split path to components."
