@@ -1,5 +1,6 @@
 (ns fs.core-test
   (:use fs.core
+        fs.compression
         midje.sweet)
   (:require [clojure.java.io :as io])
   (:import java.io.File))

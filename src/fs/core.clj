@@ -4,10 +4,7 @@
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io]
             [clojure.string :as string])
-  (:import (java.io File FilenameFilter)
-           (java.util.zip ZipFile GZIPInputStream)
-           org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-           org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream))
+  (:import (java.io File FilenameFilter)))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
 ;; and cannot be changed. This library will provide a way to simulate a
@@ -375,50 +372,6 @@ If 'trim-ext' is true, any extension is trimmed."
   "Change directory. This only changes the value of cwd
    (you can't change directory in Java)."
   [path] (swap! cwd (constantly (file path))))
-
-(defn unzip
-  "Takes the path to a zipfile source and unzips it to target-dir."
-  ([source]
-     (unzip source (name source)))
-  ([source target-dir]
-     (let [zip (ZipFile. (file source))
-           entries (enumeration-seq (.entries zip))
-           target-file #(file target-dir (.getName %))]
-       (doseq [entry entries :when (not (.isDirectory entry))
-               :let [f (target-file entry)]]
-         (mkdirs (parent f))
-         (io/copy (.getInputStream zip entry) f)))
-     target-dir))
-
-(defn- tar-entries
-  "Get a lazy-seq of entries in a tarfile."
-  [tin]
-  (when-let [entry (.getNextTarEntry tin)]
-    (cons entry (lazy-seq (tar-entries tin)))))
-
-(defn untar
-  "Takes a tarfile source and untars it to target."
-  ([source] (untar source (name source)))
-  ([source target]
-     (with-open [tin (TarArchiveInputStream. (io/input-stream (file source)))]
-       (doseq [entry (tar-entries tin) :when (not (.isDirectory entry))
-               :let [output-file (file target (.getName entry))]]
-         (mkdirs (parent output-file))
-         (io/copy tin output-file)))))
-
-(defn gunzip
-  "Takes a path to a gzip file source and unzips it."
-  ([source] (gunzip source (name source)))
-  ([source target]
-     (io/copy (-> source file io/input-stream GZIPInputStream.)
-              (file target))))
-
-(defn bunzip2
-  "Takes a path to a bzip2 file source and uncompresses it."
-  ([source] (bunzip2 source (name source)))
-  ([source target]
-     (io/copy (-> source file io/input-stream BZip2CompressorInputStream.)
-              (file target))))
 
 (defn parents
   "Get all the parent directories of a path."
