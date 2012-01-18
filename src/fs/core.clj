@@ -169,8 +169,8 @@ If 'trim-ext' is true, any extension is trimmed."
   (.mkdirs (file path))
   path)
 
-(def unix-root "The root of a unix system is /, nil on Windows"
-  (when (= File/separator "/") File/separator))
+(def ^{:doc "The root of a unix system is /, nil on Windows"} 
+  unix-root (when (= File/separator "/") File/separator))
 
 (defn split
   "Split path to components."
