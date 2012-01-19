@@ -1,6 +1,6 @@
 (ns fs.core
   "File system utilities in Clojure"
-  (:refer-clojure :exclude [name])
+  (:refer-clojure :exclude [name parents])
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io]
             [clojure.string :as string])
