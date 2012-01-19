@@ -1,4 +1,5 @@
 (ns fs.core-test
+  (:refer-clojure :exclude [name parents])
   (:use fs.core
         fs.compression
         midje.sweet)
