@@ -45,7 +45,7 @@
 
 ;; Library functions will call this function on paths/files so that
 ;; we get the cwd effect on them.
-(defn file
+(defn ^File file
   "If path is a period, replaces it with cwd and creates a new File object
    out of it and paths. Or, if the resulting File object does not constitute
    an absolute path, makes it absolutely by creating a new File object out of
@@ -56,7 +56,7 @@
                              @cwd
                              path)
                    paths)]
-    (if (.isAbsolute path)
+    (if (.isAbsolute ^File path)
       path
       (io/file @cwd path))))
 
@@ -101,15 +101,15 @@
   [path]
   (.getCanonicalFile (file path)))
 
-(defn base-name
+(defn ^String base-name
   "Return the base name (final segment/file part) of a path.
 If optional 'trim-ext' is a string and the path ends with that string, it is trimmed.
 If 'trim-ext' is true, any extension is trimmed."
   ([path] (.getName (file path)))
-  ([path trim-ext] 
+  ([path trim-ext]
      (let [base (.getName (file path))]
        (cond (string? trim-ext) (if (.endsWith base trim-ext)
-                                  (subs base 0 (- (.length base) (.length trim-ext)))
+                                  (subs base 0 (- (count base) (count trim-ext)))
                                   base)
              trim-ext (let [dot (.lastIndexOf base ".")]
                         (if (pos? dot) (subs base 0 dot) base))
@@ -188,7 +188,7 @@ If 'trim-ext' is true, any extension is trimmed."
   [old-path new-path]
   (.renameTo (file old-path) (file new-path)))
 
-(defn- ensure-file [path]
+(defn- ^File ensure-file [path]
   (let [f (file path)]
     (when-not (.exists f)
       (.createNewFile f))
@@ -257,10 +257,11 @@ If 'trim-ext' is true, any extension is trimmed."
         root (if (= (count parts) 1) ["."] (butlast parts))
         regex (glob->regex (last parts))]
     (seq (.listFiles
-          (apply file root)
-          (reify FilenameFilter
-            (accept [_ _ filename]
-              (boolean (re-find regex filename))))))))
+           ^File
+           (apply file root)
+           (reify FilenameFilter
+             (accept [_ _ filename]
+               (boolean (re-find regex filename))))))))
 
 (defn- iterzip
   "Iterate over a zip, returns a sequence of the nodes with a nil suffix"
@@ -268,14 +269,11 @@ If 'trim-ext' is true, any extension is trimmed."
   (when-not (zip/end? z)
     (cons (zip/node z) (lazy-seq (iterzip (zip/next z))))))
 
-(defn- f-dir? [f]
+(defn- f-dir? [^File f]
   (when f (.isDirectory f)))
 
-(defn- f-children [f]
+(defn- f-children [^File f]
   (.listFiles f))
-
-(defn- f-base [f]
-  (.getName f))
 
 (defn- iterate-dir* [path]
   (let [root (file path)
@@ -284,8 +282,8 @@ If 'trim-ext' is true, any extension is trimmed."
 
 (defn- walk-map-fn [root]
   (let [kids (f-children root)
-        dirs (set (map f-base (filter f-dir? kids)))
-        files (set (map f-base (filter (complement f-dir?) kids)))]
+        dirs (set (map base-name (filter f-dir? kids)))
+        files (set (map base-name (filter (complement f-dir?) kids)))]
     [root dirs files]))
 
 (defn iterate-dir
@@ -341,14 +339,14 @@ If 'trim-ext' is true, any extension is trimmed."
    to a directory with the same name as 'from' within the 'to' directory."
   [from to]
   (when (exists? from)
-    (if (file? to) 
+    (if (file? to)
       (throw (IllegalArgumentException. (str to " is a file")))
       (let [from (file from)
             to (if (exists? to)
                  (file to (base-name from))
                  (file to))
-            trim-size (-> from .getPath count inc)
-            dest #(file to (subs (.getPath %) trim-size))]
+            trim-size (-> from str count inc)
+            dest #(file to (subs (str %) trim-size))]
         (mkdirs to)
         (dorun
          (walk (fn [root dirs files]

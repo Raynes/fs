@@ -3,7 +3,8 @@
   (:require [clojure.java.io :as io]
             [fs.core :as fs])
   (:import (java.util.zip ZipFile GZIPInputStream)
-            org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+            (org.apache.commons.compress.archivers.tar TarArchiveInputStream
+                                                       TarArchiveEntry)
             org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream))
 
 (defn unzip
@@ -13,8 +14,8 @@
   ([source target-dir]
      (let [zip (ZipFile. (fs/file source))
            entries (enumeration-seq (.entries zip))
-           target-file #(fs/file target-dir (.getName %))]
-       (doseq [entry entries :when (not (.isDirectory entry))
+           target-file #(fs/file target-dir (str %))]
+       (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
                :let [f (target-file entry)]]
          (fs/mkdirs (fs/parent f))
          (io/copy (.getInputStream zip entry) f)))
@@ -22,7 +23,7 @@
 
 (defn- tar-entries
   "Get a lazy-seq of entries in a tarfile."
-  [tin]
+  [^TarArchiveInputStream tin]
   (when-let [entry (.getNextTarEntry tin)]
     (cons entry (lazy-seq (tar-entries tin)))))
 
@@ -31,7 +32,7 @@
   ([source] (untar source (name source)))
   ([source target]
      (with-open [tin (TarArchiveInputStream. (io/input-stream (fs/file source)))]
-       (doseq [entry (tar-entries tin) :when (not (.isDirectory entry))
+       (doseq [^TarArchiveEntry entry (tar-entries tin) :when (not (.isDirectory entry))
                :let [output-file (fs/file target (.getName entry))]]
          (fs/mkdirs (fs/parent output-file))
          (io/copy tin output-file)))))
