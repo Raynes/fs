@@ -388,7 +388,7 @@ If 'trim-ext' is true, any extension is trimmed."
   [p c] (some #{(file p)} (parents c)))
 
 (defn ns-path
-  "Takes a namespace symbol and creates a path to it. Replaces hypens with
+  "Takes a namespace symbol and creates a path to it. Replaces hyphens with
    underscores. Assumes the path should be relative to cwd."
   [n]
   (file
