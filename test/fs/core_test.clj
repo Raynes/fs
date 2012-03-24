@@ -293,3 +293,7 @@
   (absolute? "/foo/") => true
   (absolute? "foo/bar") => false
   (absolute? "foo/") => false)
+
+(fact
+  (join "foo" "bar" "baz") => "foo/bar/baz"
+  (join "foo") => "foo")
