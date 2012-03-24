@@ -65,6 +65,11 @@
   [path]
   (seq (.list (file path))))
 
+(defn absolute?
+  "Return true if path is absolute."
+  [path]
+  (.isAbsolute (io/file path)))
+
 (defn executable?
   "Return true if path is executable."
   [path]
