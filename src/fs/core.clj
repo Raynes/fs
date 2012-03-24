@@ -410,3 +410,10 @@ If 'trim-ext' is true, any extension is trimmed."
   "Join one or more path components."
   [& paths]
   (.getPath (apply io/file paths)))
+
+(defn find-files
+  "Walks directory recursively and return paths of files matching given pattern."
+  [path pattern]
+  (for [f (-> path io/file file-seq)
+        :when (re-matches pattern (.getName f))]
+    (.getPath f)))
