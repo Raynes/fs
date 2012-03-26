@@ -406,11 +406,6 @@ If 'trim-ext' is true, any extension is trimmed."
        (replace \_ \-)
        (replace \/ \.))))
 
-(defn join
-  "Join one or more path components."
-  [& paths]
-  (.getPath (apply io/file paths)))
-
 (defn find-files
   "Walks directory recursively and return paths of files matching given pattern."
   [path pattern]
