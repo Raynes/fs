@@ -407,8 +407,8 @@ If 'trim-ext' is true, any extension is trimmed."
        (replace \/ \.))))
 
 (defn find-files
-  "Walks directory recursively and return paths of files matching given pattern."
+  "Find files matching given pattern."
   [path pattern]
-  (for [f (-> path io/file file-seq)
+  (for [f (-> path file file-seq)
         :when (re-matches pattern (.getName f))]
-    (.getPath f)))
+    f))
