@@ -287,3 +287,13 @@
 
 (fact
   (str (ns-path 'foo.bar.baz-quux)) => (has-suffix "foo/bar/baz_quux.clj"))
+
+(fact
+  (absolute? "/foo/bar") => true
+  (absolute? "/foo/") => true
+  (absolute? "foo/bar") => false
+  (absolute? "foo/") => false)
+
+(fact
+  (join "foo" "bar" "baz") => "foo/bar/baz"
+  (join "foo") => "foo")

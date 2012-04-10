@@ -65,6 +65,11 @@
   [path]
   (seq (.list (file path))))
 
+(defn absolute?
+  "Return true if path is absolute."
+  [path]
+  (.isAbsolute (io/file path)))
+
 (defn executable?
   "Return true if path is executable."
   [path]
@@ -383,7 +388,7 @@ If 'trim-ext' is true, any extension is trimmed."
   [p c] (some #{(file p)} (parents c)))
 
 (defn ns-path
-  "Takes a namespace symbol and creates a path to it. Replaces hypens with
+  "Takes a namespace symbol and creates a path to it. Replaces hyphens with
    underscores. Assumes the path should be relative to cwd."
   [n]
   (file
@@ -400,3 +405,10 @@ If 'trim-ext' is true, any extension is trimmed."
    (.. (.replaceAll (str path) "\\.clj" "")
        (replace \_ \-)
        (replace \/ \.))))
+
+(defn find-files
+  "Find files matching given pattern."
+  [path pattern]
+  (for [f (-> path file file-seq)
+        :when (re-matches pattern (.getName f))]
+    f))
