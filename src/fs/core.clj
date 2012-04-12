@@ -376,6 +376,18 @@ If 'trim-ext' is true, any extension is trimmed."
    (you can't change directory in Java)."
   [path] (swap! cwd (constantly (file path))))
 
+(defn with-dir*
+  [dir func]
+  (let [old-dir @cwd]
+    (try
+      (chdir dir)
+      (func)
+      (finally (chdir old-dir)))))
+
+(defmacro with-dir
+  [dir & body]
+  `(with-dir* ~dir (fn [] ~@body)))
+
 (defn parents
   "Get all the parent directories of a path."
   [f]
