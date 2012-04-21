@@ -247,6 +247,19 @@
     (chdir "test")
     @cwd => (io/file old "test")))
 
+(fact
+ (let [old @cwd]
+   (mkdirs "foo/bar/baz")
+   (with-dir "foo/bar"
+     @cwd =not=> old
+     (exists? "hehe.txt") => false
+     (spit (file "hehe.txt") "well why not")
+     (slurp (file "hehe.txt")) => "well why not")
+   @cwd => old
+   (exists? "hehe.txt") => false
+   (slurp (file "foo/bar/hehe.txt")) => "well why not"
+   (delete-dir "foo")))
+
 (against-background
  [(before :contents (chdir "fs/testfiles"))]
  
