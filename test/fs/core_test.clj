@@ -155,7 +155,8 @@
   (let [root (create-walk-dir)]
     (walk vector root) => (contains [[root #{"b" "a"} #{"1"}]
                                      [(file root "a") #{} #{"2"}]
-                                     [(file root "b") #{} #{"3"}]])
+                                     [(file root "b") #{} #{"3"}]] 
+                                    :in-any-order)
     (delete-dir root)))
 
 (fact
@@ -198,7 +199,8 @@
     (walk vector to) => (contains [[to #{(base-name from)} #{}]
                                    [dest #{"b" "a"} #{"1"}]
                                    [(file dest "a") #{} #{"2"}]
-                                   [(file dest "b") #{} #{"3"}]])
+                                   [(file dest "b") #{} #{"3"}]]
+                                  :in-any-order)
     (delete-dir from)
     (delete-dir to)))
 
