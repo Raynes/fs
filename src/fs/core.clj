@@ -3,7 +3,8 @@
   (:refer-clojure :exclude [name parents])
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [clojure.java.sh :as sh])
   (:import (java.io File FilenameFilter)))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
@@ -412,3 +413,8 @@ If 'trim-ext' is true, any extension is trimmed."
   (for [f (-> path file file-seq)
         :when (re-matches pattern (.getName f))]
     f))
+
+(defn exec 
+  "Execute a shell command in the current directory"
+  [& body]
+  (sh/with-sh-dir @cwd (apply sh/sh body)))
