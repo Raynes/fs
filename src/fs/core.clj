@@ -4,7 +4,7 @@
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io]
             [clojure.string :as string]
-            [clojure.java.sh :as sh])
+            [clojure.java.shell :as sh])
   (:import (java.io File FilenameFilter)))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
