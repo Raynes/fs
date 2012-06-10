@@ -18,8 +18,8 @@
     root))
 
 (fact "Makes paths absolute."
-  (file ".") => @cwd
-  (file "foo") => (io/file @cwd "foo"))
+  (file ".") => *cwd*
+  (file "foo") => (io/file *cwd* "foo"))
 
 (fact "Expands path to current user."
   (let [user (System/getProperty "user.home")]
@@ -90,10 +90,10 @@
     (delete tmp)))
 
 (fact
-  (absolute-path "foo") => (str (io/file @cwd "foo")))
+  (absolute-path "foo") => (str (io/file *cwd* "foo")))
 
 (fact
-  (normalized-path ".") => @cwd)
+  (normalized-path ".") => *cwd*)
 
 (fact
   (base-name "foo/bar") => "bar"
@@ -244,35 +244,39 @@
     ""              "fs"
     ".bashrc"       ".bashrc")
 
-(fact
-  (let [old @cwd]
-    (chdir "test")
-    @cwd => (io/file old "test")))
+(fact "Can change cwd with with-cwd."
+  (let [old *cwd*]
+    (with-cwd "foo"
+      *cwd* => (io/file old "foo"))))
 
-(against-background
- [(before :contents (chdir "fs/testfiles"))]
- 
- (fact
-   (unzip "ggg.zip" "zggg")
-   (exists? "zggg/ggg") => true
-   (exists? "zggg/hhh/jjj") => true
-   (delete-dir "zggg"))
- 
- (fact
-   (untar "ggg.tar" "zggg")
-   (exists? "zggg/ggg") => true
-   (exists? "zggg/hhh/jjj") => true
-   (delete-dir "zggg"))
+(fact "Can change cwd mutably with with-mutable-cwd"
+  (let [old *cwd*]
+    (with-mutable-cwd
+      (chdir "foo")
+      *cwd* => (io/file old "foo"))))
 
- (fact
-   (gunzip "ggg.gz" "ggg")
-   (exists? "ggg") => true
-   (delete "ggg"))
+(with-cwd "test/fs/testfiles"
+  (fact
+    (unzip "ggg.zip" "zggg")
+    (exists? "zggg/ggg") => true
+    (exists? "zggg/hhh/jjj") => true
+    (delete-dir "zggg"))
+  
+  (fact
+    (untar "ggg.tar" "zggg")
+    (exists? "zggg/ggg") => true
+    (exists? "zggg/hhh/jjj") => true
+    (delete-dir "zggg"))
 
- (fact
-   (bunzip2 "bbb.bz2" "bbb")
-   (exists? "bbb") => true
-   (delete "bbb")))
+  (fact
+    (gunzip "ggg.gz" "ggg")
+    (exists? "ggg") => true
+    (delete "ggg"))
+
+  (fact
+    (bunzip2 "bbb.bz2" "bbb")
+    (exists? "bbb") => true
+    (delete "bbb")))
 
 (fact
   (parents "/foo/bar/baz/") => (in-any-order [(file "/foo")
