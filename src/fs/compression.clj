@@ -21,6 +21,44 @@
          (io/copy (.getInputStream zip entry) f)))
      target-dir))
 
+(defn- add-zip-entry
+  "Add a zip entry. Works for strings and byte-arrays."
+  [zip-output-stream [name content & remain]]
+  (.putNextEntry zip-output-stream (java.util.zip.ZipEntry. name))
+  (if (string? content) ;string and byte-array must have different methods
+    (doto (java.io.PrintStream. zip-output-stream true)
+      (.println content))
+    (.write zip-output-stream content))
+  (.closeEntry zip-output-stream)
+  (when (seq (drop 1 remain))
+    (recur zip-output-stream remain)))
+
+(defn make-zip-stream
+  "Create zip file(s) stream. You must provide a vector of the
+  following form: [[filename1 content1][filename2 content2]...].
+
+  You can provide either strings or byte-arrays as content.
+
+  The piped streams are used to create content on the fly, which means
+  this can be used to make compressed files without even writing them
+  to disk." [& filename-content-pairs]
+  (let [file
+        (let [pipe-in (java.io.PipedInputStream.)]
+          (future
+            (with-open [zip (java.util.zip.ZipOutputStream. (java.io.PipedOutputStream. pipe-in))]
+              (add-zip-entry zip (flatten filename-content-pairs))))
+          pipe-in)]
+    (io/input-stream file)))
+
+(defn zip
+  "Create zip file(s) on the fly. You must provide a vector of the
+  following form: [[filename1 content1][filename2 content2]...].
+
+  You can provide either strings or byte-arrays as content."
+  [filename & filename-content-pairs]
+  (io/copy (make-zip-stream filename-content-pairs)
+           (io/file filename)))
+
 (defn- tar-entries
   "Get a lazy-seq of entries in a tarfile."
   [^TarArchiveInputStream tin]
