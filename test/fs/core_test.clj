@@ -261,7 +261,13 @@
     (exists? "zggg/ggg") => true
     (exists? "zggg/hhh/jjj") => true
     (delete-dir "zggg"))
-  
+
+  (fact (zip "fro.zip" ["bbb.txt" "bbb"])
+        (exists? "fro.zip") => true
+        (unzip "fro.zip" "fro")
+        (exists? "fro/bbb.txt") => true
+        (delete-dir "fro"))
+
   (fact
     (untar "ggg.tar" "zggg")
     (exists? "zggg/ggg") => true
