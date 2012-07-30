@@ -57,7 +57,7 @@
   You can provide either strings or byte-arrays as content."
   [filename & filename-content-pairs]
   (io/copy (make-zip-stream filename-content-pairs)
-           #(fs/file filename)))
+           (fs/file filename)))
 
 (defn- tar-entries
   "Get a lazy-seq of entries in a tarfile."
