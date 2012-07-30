@@ -266,6 +266,7 @@
         (exists? "fro.zip") => true
         (unzip "fro.zip" "fro")
         (exists? "fro/bbb.txt") => true
+        (delete "fro.zip")
         (delete-dir "fro"))
 
   (fact
