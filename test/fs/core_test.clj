@@ -9,7 +9,7 @@
 (def system-tempdir (System/getProperty "java.io.tmpdir"))
 
 (defn create-walk-dir []
-  (let [root (temp-dir)]
+  (let [root (temp-dir "fs-")]
     (mkdir (file root "a"))
     (mkdir (file root "b"))
     (spit (file root "1") "1")
@@ -78,13 +78,13 @@
   (file? "test/fs/testfiles/foo") => true)
 
 (fact
-  (let [tmp (temp-file)]
+  (let [tmp (temp-file "fs-")]
     (exists? tmp) => true
     (file? tmp) => true
     (delete tmp)))
 
 (fact
-  (let [tmp (temp-dir)]
+  (let [tmp (temp-dir "fs-")]
     (exists? tmp) => true
     (directory? tmp) => true
     (delete tmp)))
@@ -102,12 +102,12 @@
   (base-name "foo/bar.txt" ".png") => "bar.txt")
 
 (fact
-  (let [tmp (temp-file)]
+  (let [tmp (temp-file "fs-")]
     (> (mod-time tmp) 0) => true
     (delete tmp)))
 
 (fact
-  (let [f (temp-file)]
+  (let [f (temp-file "fs-")]
     (spit f "abc")
     (size f) => 3
     (delete f)))
@@ -119,14 +119,14 @@
     root => result))
 
 (fact
-  (let [f (temp-file)]
+  (let [f (temp-file "fs-")]
     (delete f)
     (mkdir f)
     (directory? f) => true
     (delete-dir f)))
 
 (fact
-  (let [f (temp-file)
+  (let [f (temp-file "fs-")
         sub (file f "a" "b")]
     (delete f)
     (mkdirs sub)
@@ -144,7 +144,7 @@
    (split "") => '("")))
 
 (fact
-  (let [f (temp-file)
+  (let [f (temp-file "fs-")
         new-f (str f "-new")]
     (rename f new-f)
     (exists? f) => false
@@ -160,8 +160,8 @@
     (delete-dir root)))
 
 (fact
-  (let [from (temp-file)
-        to (temp-file)
+  (let [from (temp-file "fs-")
+        to (temp-file "fs-")
         data "What's up Doc?"]
     (delete to)
     (spit from data)
@@ -171,7 +171,7 @@
     (delete to)))
 
 (fact
-  (let [f (temp-file)
+  (let [f (temp-file "fs-")
         t (mod-time f)]
     (Thread/sleep 1000)
     (touch f)
@@ -182,7 +182,7 @@
     (delete f)))
 
 (fact
-  (let [f (temp-file)]
+  (let [f (temp-file "fs-")]
     (chmod "+x" f)
     (executable? f) => true
     (when-not (re-find #"Windows" (System/getProperty "os.name"))
@@ -192,7 +192,7 @@
 
 (fact
   (let [from (create-walk-dir)
-        to (temp-dir)
+        to (temp-dir "fs-")
         path (copy-dir from to)
         dest (file to (base-name from))]
     path => dest
@@ -306,4 +306,3 @@
   (absolute? "/foo/") => true
   (absolute? "foo/bar") => false
   (absolute? "foo/") => false)
-
