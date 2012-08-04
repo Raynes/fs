@@ -169,14 +169,12 @@ If 'trim-ext' is true, any extension is trimmed."
 (defn mkdir
   "Create a directory. Returns path."
   [path]
-  (.mkdir (file path))
-  path)
+  (.mkdir (file path)))
 
 (defn mkdirs
   "Make directory tree. Returns path."
   [path]
-  (.mkdirs (file path))
-  path)
+  (.mkdirs (file path)))
 
 (def ^{:doc "The root of a unix system is /, nil on Windows"} 
   unix-root (when (= File/separator "/") File/separator))
