@@ -1,5 +1,7 @@
 (defproject fs "1.2.2"
   :description "File system utilities for clojure"
+  :license {:name "Eclipse Public License - v 1.0"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
   :url "https://github.com/Raynes/fs"
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.apache.commons/commons-compress "1.3"]]
