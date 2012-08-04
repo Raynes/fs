@@ -223,17 +223,28 @@ If 'trim-ext' is true, any extension is trimmed."
      (format "%s%s-%s%s" prefix (System/currentTimeMillis)
              (long (rand 0x100000000)) suffix)))
 
-(defn temp-dir
-  "Create a temporary directory. Returns nil if directory could not
-   be created even after n tries."
-  ([prefix]        (temp-dir prefix "" 10))
-  ([prefix suffix] (temp-dir prefix suffix 10))
-  ([prefix suffix tries]
+(defn- temp-create
+  "Create a temporary file or dir, trying n times before giving up."
+  ([prefix suffix tries f]
      (loop [tries (range tries)]
        (let [tmp (file (tmpdir) (temp-name prefix suffix))]
-         (if (and (seq tries) (mkdir tmp))
+         (if (and (seq tries) (f tmp))
            tmp
            (recur (rest tries)))))))
+
+(defn temp-file
+  "Create a temporary file. Returns nil if file could not be created
+   even after n tries (default 10)."
+  ([prefix]              (temp-file prefix "" 10))
+  ([prefix suffix]       (temp-file prefix suffix 10))
+  ([prefix suffix tries] (temp-create prefix suffix tries create)))
+
+(defn temp-dir
+  "Create a temporary directory. Returns nil if dir could not be created
+   even after n tries (default 10)."
+  ([prefix]              (temp-dir prefix "" 10))
+  ([prefix suffix]       (temp-dir prefix suffix 10))
+  ([prefix suffix tries] (temp-create prefix suffix tries mkdir)))
 
 (defn temp-file 
   "Create a temporary file."
