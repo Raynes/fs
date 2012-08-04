@@ -193,10 +193,15 @@ If 'trim-ext' is true, any extension is trimmed."
   [old-path new-path]
   (.renameTo (file old-path) (file new-path)))
 
+(defn create
+  "Create a new file."
+  [f]
+  (.createNewFile f))
+
 (defn- ^File ensure-file [path]
   (let [f (file path)]
     (when-not (.exists f)
-      (.createNewFile f))
+      (create f))
     f))
 
 (defn- assert-exists [path]
