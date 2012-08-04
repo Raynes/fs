@@ -88,10 +88,9 @@
   (.canWrite (file path)))
 
 (defn delete
-  "Delete path. Returns path."
+  "Delete path."
   [path]
-  (.delete (file path))
-  path)
+  (.delete (file path)))
 
 (defn exists?
   "Return true if path exists."
@@ -165,12 +164,12 @@ If 'trim-ext' is true, any extension is trimmed."
   (.length (file path)))
 
 (defn mkdir
-  "Create a directory. Returns path."
+  "Create a directory."
   [path]
   (.mkdir (file path)))
 
 (defn mkdirs
-  "Make directory tree. Returns path."
+  "Make directory tree."
   [path]
   (.mkdirs (file path)))
 
