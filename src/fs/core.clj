@@ -226,6 +226,18 @@ If 'trim-ext' is true, any extension is trimmed."
      (let [date (time/in-msecs (time/interval (time/epoch) (time/now)))]
        (format "%s%s-%s%s" prefix date (long (rand 0x100000000)) suffix))))
 
+(defn temp-dir
+  "Create a temporary directory. Returns nil if directory could not
+   be created even after n tries."
+  ([prefix]        (temp-dir prefix "" 10))
+  ([prefix suffix] (temp-dir prefix suffix 10))
+  ([prefix suffix tries]
+     (loop [tries (range tries)]
+       (let [tmp (file (tmpdir) (temp-name prefix suffix))]
+         (if (and (seq tries) (mkdir tmp))
+           tmp
+           (recur (rest tries)))))))
+
 (defn temp-file 
   "Create a temporary file."
   ([]
@@ -236,15 +248,6 @@ If 'trim-ext' is true, any extension is trimmed."
      (File/createTempFile prefix suffix))
   ([prefix suffix directory]
      (File/createTempFile prefix suffix (file directory))))
-
-(defn temp-dir
-  "Create a temporary directory."
-  ([] (temp-dir nil))
-  ([root]
-   (let [dir (File/createTempFile "-fs-" "" (file root))]
-     (delete dir)
-     (mkdir dir)
-     dir)))
 
 ; Taken from https://github.com/jkk/clj-glob. (thanks Justin!)
 (defn- glob->regex
