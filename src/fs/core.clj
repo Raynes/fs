@@ -4,9 +4,7 @@
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io]
             [clojure.string :as string]
-            [clojure.java.shell :as sh]
-            [clj-time.core :as time]
-            [clj-time.format :as ftime])
+            [clojure.java.shell :as sh])
   (:import (java.io File FilenameFilter)))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
@@ -223,8 +221,8 @@ If 'trim-ext' is true, any extension is trimmed."
    and temp-dir."
   ([prefix] (temp-name prefix ""))
   ([prefix suffix]
-     (let [date (time/in-msecs (time/interval (time/epoch) (time/now)))]
-       (format "%s%s-%s%s" prefix date (long (rand 0x100000000)) suffix))))
+     (format "%s%s-%s%s" prefix (System/currentTimeMillis)
+             (long (rand 0x100000000)) suffix)))
 
 (defn temp-dir
   "Create a temporary directory. Returns nil if directory could not
