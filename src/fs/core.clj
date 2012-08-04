@@ -198,12 +198,6 @@ If 'trim-ext' is true, any extension is trimmed."
   [f]
   (.createNewFile f))
 
-(defn- ^File ensure-file [path]
-  (let [f (file path)]
-    (when-not (.exists f)
-      (create f))
-    f))
-
 (defn- assert-exists [path]
   (when-not (exists? path)
     (throw (IllegalArgumentException. (str path " not found")))))
@@ -327,10 +321,11 @@ If 'trim-ext' is true, any extension is trimmed."
 
 (defn touch
   "Set file modification time (default to now). Returns path."
-  [path & time]
-  (let [file (ensure-file path)]
-    (.setLastModified file (if time (first time) (System/currentTimeMillis)))
-    file))
+  [path & [time]]
+  (let [file (file path)]
+    (when-not (create file)
+      (.setLastModified file (or time (System/currentTimeMillis)))))
+  file)
 
 (defn chmod
   "Change file permissions. Returns path.
