@@ -4,7 +4,9 @@
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io]
             [clojure.string :as string]
-            [clojure.java.shell :as sh])
+            [clojure.java.shell :as sh]
+            [clj-time.core :as time]
+            [clj-time.format :as ftime])
   (:import (java.io File FilenameFilter)))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
@@ -211,6 +213,20 @@ If 'trim-ext' is true, any extension is trimmed."
   (assert-exists from)
   (io/copy (file from) (file to))
   to)
+
+(defn tmpdir
+  "The temporary file directory looked up via the java.io.tmpdir
+   system property. Does not create a temporary directory."
+  []
+  (System/getProperty "java.io.tmpdir"))
+
+(defn temp-name
+  "Create a temporary file name like what is created for temp-file
+   and temp-dir."
+  ([prefix] (temp-name prefix ""))
+  ([prefix suffix]
+     (let [date (time/in-msecs (time/interval (time/epoch) (time/now)))]
+       (format "%s%s-%s%s" prefix date (long (rand 0x100000000)) suffix))))
 
 (defn temp-file 
   "Create a temporary file."
