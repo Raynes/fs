@@ -67,7 +67,8 @@
 (fact
   (let [f (io/file "test/fs/testfiles/baz")]
     (.createNewFile f)
-    (delete f) =not=> (exists? f)))
+    (delete f)
+    (exists? f) => false))
 
 (fact
   (directory? ".") => true
@@ -115,8 +116,7 @@
 (fact
   (let [root (create-walk-dir)
         result (delete-dir root)]
-    (exists? root) => false
-    root => result))
+    (exists? root) => false))
 
 (fact
   (let [f (temp-file "fs-")]
