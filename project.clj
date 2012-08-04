@@ -1,4 +1,4 @@
-(defproject fs "1.2.1"
+(defproject fs "1.2.2"
   :description "File system utilities for clojure"
   :url "https://github.com/Raynes/fs"
   :dependencies [[org.clojure/clojure "1.4.0"]
