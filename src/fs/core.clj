@@ -245,17 +245,6 @@ If 'trim-ext' is true, any extension is trimmed."
   ([prefix suffix]       (temp-dir prefix suffix 10))
   ([prefix suffix tries] (temp-create prefix suffix tries mkdir)))
 
-(defn temp-file 
-  "Create a temporary file."
-  ([]
-     (temp-file "-fs-" ""))
-  ([prefix]
-     (temp-file prefix ""))
-  ([prefix suffix]
-     (File/createTempFile prefix suffix))
-  ([prefix suffix directory]
-     (File/createTempFile prefix suffix (file directory))))
-
 ; Taken from https://github.com/jkk/clj-glob. (thanks Justin!)
 (defn- glob->regex
   "Takes a glob-format string and returns a regex."
