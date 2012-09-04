@@ -20,6 +20,33 @@ because I probably want it. Make sure you include tests. Also, make sure they pa
 
 fs is *not* an I/O utility library. We should try to keep things limited to file system activities.
 
+## Artifacts
+
+Library artifacts are [released to Clojars](https://clojars.org/fs/fs). If you are using Maven, add the following repository
+definition to your `pom.xml`:
+
+``` xml
+<repository>
+  <id>clojars.org</id>
+  <url>http://clojars.org/repo</url>
+</repository>
+```
+
+### The Most Recent Release
+
+With Leiningen:
+
+    [fs "1.3.2"]
+
+
+With Maven:
+
+    <dependency>
+      <groupId>fs</groupId>
+      <artifactId>fs</artifactId>
+      <version>1.3.2</version>
+    </dependency>
+
 ## Contributors
 
 This library was originally devised and maintained by Miki Tebeka, but [I](https://github.com/Raynes) took over for him.
