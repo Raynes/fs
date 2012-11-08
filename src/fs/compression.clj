@@ -27,7 +27,7 @@
   (.putNextEntry zip-output-stream (java.util.zip.ZipEntry. name))
   (if (string? content) ;string and byte-array must have different methods
     (doto (java.io.PrintStream. zip-output-stream true)
-      (.println content))
+      (.print content))
     (.write zip-output-stream content))
   (.closeEntry zip-output-stream)
   (when (seq (drop 1 remain))
