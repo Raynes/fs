@@ -269,6 +269,11 @@
         (delete "fro.zip")
         (delete-dir "fro"))
 
+  (fact "about zip round trip"
+    (zip "round.zip" ["some.txt" "some text"])
+    (unzip "round.zip" "round")
+    (slurp (file "round/some.txt")) => "some text")
+
   (fact
     (untar "ggg.tar" "zggg")
     (exists? "zggg/ggg") => true
