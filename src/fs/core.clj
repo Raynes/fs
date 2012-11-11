@@ -398,7 +398,7 @@ If 'trim-ext' is true, any extension is trimmed."
    of the second."
   [p c] (some #{(file p)} (parents c)))
 
-(defn ns-path
+(defn ns->path
   "Takes a namespace symbol and creates a path to it. Replaces hyphens with
    underscores. Assumes the path should be relative to cwd."
   [n]
@@ -408,7 +408,7 @@ If 'trim-ext' is true, any extension is trimmed."
             (replace \. \/))
         ".clj")))
 
-(defn path-ns
+(defn path->ns
   "Takes a path to a Clojure file and constructs a namespace symbol
    out of the path."
   [path]
@@ -448,3 +448,5 @@ If 'trim-ext' is true, any extension is trimmed."
   [path]
   (set! *cwd* (file path)))
 
+(def ns-path ns->path)
+(def path-ns path->ns)
