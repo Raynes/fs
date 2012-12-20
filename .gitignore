@@ -5,3 +5,6 @@ classes
 pom.xml
 README.html
 docs
+target
+pom.xml*
+doc
