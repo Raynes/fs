@@ -1,11 +1,11 @@
-(ns fs.compression
+(ns me.raynes.fs.compression
   "Compression utilities."
   (:require [clojure.java.io :as io]
-            [fs.core :as fs])
+            [me.raynes.fs :as fs])
   (:import (java.util.zip ZipFile GZIPInputStream)
-            (org.apache.commons.compress.archivers.tar TarArchiveInputStream
-                                                       TarArchiveEntry)
-            org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream))
+           (org.apache.commons.compress.archivers.tar TarArchiveInputStream
+                                                      TarArchiveEntry)
+           org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream))
 
 (defn unzip
   "Takes the path to a zipfile source and unzips it to target-dir."

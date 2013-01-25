@@ -1,4 +1,4 @@
-(ns fs.core
+(ns me.raynes.fs
   "File system utilities in Clojure"
   (:refer-clojure :exclude [name parents])
   (:require [clojure.zip :as zip]

@@ -1,9 +1,9 @@
-(ns fs.core-test
+(ns me.raynes.core-test
   (:refer-clojure :exclude [name parents])
-  (:use fs.core
-        fs.compression
-        midje.sweet)
-  (:require [clojure.java.io :as io])
+  (:require [me.raynes.fs :refer :all]
+            [me.raynes.fs.compression :refer :all]
+            [midje.sweet :refer :all]
+            [clojure.java.io :as io]) 
   (:import java.io.File))
 
 (def system-tempdir (System/getProperty "java.io.tmpdir"))
@@ -36,7 +36,7 @@
 
 ;; Want to change these files to be tempfiles at some point.
 (against-background
- [(around :contents (let [f (io/file "test/fs/testfiles/bar")]
+ [(around :contents (let [f (io/file "test/me/raynes/testfiles/bar")]
                       (.setExecutable f false)
                       (.setReadable f false)
                       (.setWritable f false)
@@ -45,38 +45,38 @@
                       (.setReadable f true)
                       (.setWritable f true)))]
  (fact
-   (executable? "test/fs/testfiles/foo") => true
-   (executable? "test/fs/testfiles/bar") => false)
+   (executable? "test/me/raynes/testfiles/foo") => true
+   (executable? "test/me/raynes/testfiles/bar") => false)
 
  (fact
-   (readable? "test/fs/testfiles/foo") => true
-   (readable? "test/fs/testfiles/bar") => false)
+   (readable? "test/me/raynes/testfiles/foo") => true
+   (readable? "test/me/raynes/testfiles/bar") => false)
 
  (fact
-   (writeable? "test/fs/testfiles/foo") => true
-   (writeable? "test/fs/testfiles/bar") => false))
+   (writeable? "test/me/raynes/testfiles/foo") => true
+   (writeable? "test/me/raynes/testfiles/bar") => false))
 
 (fact
-  (file? "test/fs/testfiles/foo") => true
+  (file? "test/me/raynes/testfiles/foo") => true
   (file? ".") => false)
 
 (fact
-  (exists? "test/fs/testfiles/foo") => true
+  (exists? "test/me/raynes/testfiles/foo") => true
   (exists? "ewjgnr4ig43j") => false)
 
 (fact
-  (let [f (io/file "test/fs/testfiles/baz")]
+  (let [f (io/file "test/me/raynes/testfiles/baz")]
     (.createNewFile f)
     (delete f)
     (exists? f) => false))
 
 (fact
   (directory? ".") => true
-  (directory? "test/fs/testfiles/foo") => false)
+  (directory? "test/me/raynes/testfiles/foo") => false)
 
 (fact
   (file? ".") => false
-  (file? "test/fs/testfiles/foo") => true)
+  (file? "test/me/raynes/testfiles/foo") => true)
 
 (fact
   (let [tmp (temp-file "fs-")]
@@ -255,7 +255,7 @@
       (chdir "foo")
       *cwd* => (io/file old "foo"))))
 
-(with-cwd "test/fs/testfiles"
+(with-cwd "test/me/raynes/testfiles"
   (fact
     (unzip "ggg.zip" "zggg")
     (exists? "zggg/ggg") => true
@@ -291,9 +291,10 @@
     (delete "bbb")))
 
 (fact
-  (parents "/foo/bar/baz/") => (in-any-order [(file "/foo")
-                                              (file "/foo/bar")
-                                              (file "/")])
+  (parents "/foo/bar/baz/") => (just [(file "/foo")
+                                      (file "/foo/bar")
+                                      (file "/")]
+                                     :in-any-order)
   (parents "/") => nil)
 
 (fact
