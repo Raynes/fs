@@ -94,4 +94,5 @@
   "Takes a path to a xz file source and uncompresses it."
   ([source] (unxz source (name source)))
   ([source target]
-    nil))
+    (io/copy (-> source fs/file io/input-stream XZCompressorInputStream.)
+             (fs/file target))))
