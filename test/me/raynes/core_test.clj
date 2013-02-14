@@ -288,7 +288,12 @@
   (fact
     (bunzip2 "bbb.bz2" "bbb")
     (exists? "bbb") => true
-    (delete "bbb")))
+    (delete "bbb"))
+
+  (fact
+    (unxz "xxx.xz" "xxx")
+    (exists? "xxx") => true
+    (delete "xxx")))
 
 (fact
   (parents "/foo/bar/baz/") => (just [(file "/foo")
