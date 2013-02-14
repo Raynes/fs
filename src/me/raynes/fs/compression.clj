@@ -5,7 +5,8 @@
   (:import (java.util.zip ZipFile GZIPInputStream)
            (org.apache.commons.compress.archivers.tar TarArchiveInputStream
                                                       TarArchiveEntry)
-           org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream))
+           (org.apache.commons.compress.compressors bzip2.BZip2CompressorInputStream
+                                                    xz.XZCompressorInputStream)))
 
 (defn unzip
   "Takes the path to a zipfile source and unzips it to target-dir."
@@ -88,3 +89,10 @@
   ([source target]
      (io/copy (-> source fs/file io/input-stream BZip2CompressorInputStream.)
               (fs/file target))))
+
+(defn unxz
+  "Takes a path to a xz file source and uncompresses it."
+  ([source] (unxz source (name source)))
+  ([source target]
+    (io/copy (-> source fs/file io/input-stream XZCompressorInputStream.)
+             (fs/file target))))
