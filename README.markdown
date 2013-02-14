@@ -24,7 +24,7 @@ fs is *not* an I/O utility library. We should try to keep things limited to file
 
 ## Artifacts
 
-Library artifacts are [released to Clojars](https://clojars.org/fs/fs). If you are using Maven, add the following repository
+Library artifacts are [released to Clojars](https://clojars.org/me.raynes/fs). If you are using Maven, add the following repository
 definition to your `pom.xml`:
 
 ``` xml
@@ -38,15 +38,15 @@ definition to your `pom.xml`:
 
 With Leiningen:
 
-    [fs "1.3.2"]
+    [me.raynes/fs "1.4.0"]
 
 
 With Maven:
 
     <dependency>
-      <groupId>fs</groupId>
+      <groupId>me.raynes</groupId>
       <artifactId>fs</artifactId>
-      <version>1.3.2</version>
+      <version>1.4.0</version>
     </dependency>
 
 ## Contributors
