@@ -3,7 +3,8 @@
   (:require [me.raynes.fs :refer :all]
             [me.raynes.fs.compression :refer :all]
             [midje.sweet :refer :all]
-            [clojure.java.io :as io]) 
+            [clojure.java.io :as io]
+            [clojure.string :as string])
   (:import java.io.File))
 
 (def system-tempdir (System/getProperty "java.io.tmpdir"))
@@ -24,7 +25,7 @@
 (fact "Expands path to current user."
   (let [user (System/getProperty "user.home")]
     (expand-home "~") => (file user)
-    (expand-home "~/foo") => (file user "foo")))
+    (expand-home (str "~" File/separator "foo")) => (file user "foo")))
 
 (fact "Expands to given user."
   (let [user (System/getProperty "user.home")
@@ -35,7 +36,7 @@
 (fact (list-dir ".") => (has every? string?))
 
 ;; Want to change these files to be tempfiles at some point.
-(against-background
+(when unix-root (against-background
  [(around :contents (let [f (io/file "test/me/raynes/testfiles/bar")]
                       (.setExecutable f false)
                       (.setReadable f false)
@@ -54,7 +55,7 @@
 
  (fact
    (writeable? "test/me/raynes/testfiles/foo") => true
-   (writeable? "test/me/raynes/testfiles/bar") => false))
+   (writeable? "test/me/raynes/testfiles/bar") => false)))
 
 (fact
   (file? "test/me/raynes/testfiles/foo") => true
@@ -295,12 +296,13 @@
     (exists? "xxx") => true
     (delete "xxx")))
 
-(fact
-  (parents "/foo/bar/baz/") => (just [(file "/foo")
-                                      (file "/foo/bar")
-                                      (file "/")]
-                                     :in-any-order)
-  (parents "/") => nil)
+(let [win-root (when-not unix-root "c:")]
+  (fact
+    (parents (str win-root "/foo/bar/baz")) => (just [(file (str win-root "/foo"))
+                                        (file (str win-root "/foo/bar"))
+                                        (file (str win-root "/"))]
+                                       :in-any-order)
+    (parents (str win-root "/")) => nil))
 
 (fact
   (child-of? "/foo/bar" "/foo/bar/baz") => truthy
@@ -310,10 +312,11 @@
   (path-ns "foo/bar/baz_quux.clj") => 'foo.bar.baz-quux)
 
 (fact
-  (str (ns-path 'foo.bar.baz-quux)) => (has-suffix "foo/bar/baz_quux.clj"))
+  (str (ns-path 'foo.bar.baz-quux)) => (has-suffix (string/join File/separator ["foo" "bar" "baz_quux.clj"])))
 
 (fact
-  (absolute? "/foo/bar") => true
-  (absolute? "/foo/") => true
-  (absolute? "foo/bar") => false
-  (absolute? "foo/") => false)
+  (let [win-root (when-not unix-root "c:")]
+    (absolute? (str win-root "/foo/bar")) => true
+    (absolute? (str win-root "/foo/")) => true
+    (absolute? "foo/bar") => false
+    (absolute? "foo/") => false))
