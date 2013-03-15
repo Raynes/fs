@@ -272,16 +272,17 @@ If 'trim-ext' is true, any extension is trimmed."
 
 (defn glob
   "Returns files matching glob pattern."
-  [pattern]
-  (let [parts (split pattern)
-        root (if (= (count parts) 1) ["."] (butlast parts))
-        regex (glob->regex (last parts))]
-    (seq (.listFiles
-           ^File
-           (apply file root)
-           (reify FilenameFilter
-             (accept [_ _ filename]
-               (boolean (re-find regex filename))))))))
+  ([pattern]
+     (let [parts (split pattern)
+           root (apply file (if (= (count parts) 1) ["."] (butlast parts)))]
+       (glob root (last parts))))
+  ([^File root pattern]
+     (let [regex (glob->regex pattern)]
+       (seq (.listFiles
+             root
+             (reify FilenameFilter
+               (accept [_ _ filename]
+                 (boolean (re-find regex filename)))))))))
 
 (defn- iterzip
   "Iterate over a zip, returns a sequence of the nodes with a nil suffix"
