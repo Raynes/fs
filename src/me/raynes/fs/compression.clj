@@ -44,9 +44,10 @@
   this can be used to make compressed files without even writing them
   to disk." [& filename-content-pairs]
   (let [file
-        (let [pipe-in (java.io.PipedInputStream.)]
+        (let [pipe-in (java.io.PipedInputStream.)
+              pipe-out (java.io.PipedOutputStream. pipe-in)]
           (future
-            (with-open [zip (java.util.zip.ZipOutputStream. (java.io.PipedOutputStream. pipe-in))]
+            (with-open [zip (java.util.zip.ZipOutputStream. pipe-out)]
               (add-zip-entry zip (flatten filename-content-pairs))))
           pipe-in)]
     (io/input-stream file)))

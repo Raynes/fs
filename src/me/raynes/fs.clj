@@ -38,7 +38,7 @@
    user relative to the parent of the current value of user.home."
   [path]
   (let [path (str path)]
-    (if (.startsWith path "~") 
+    (if (.startsWith path "~")
       (let [sep (.indexOf path File/separator)]
         (if (neg? sep)
           (home (subs path 1))
@@ -173,7 +173,7 @@ If 'trim-ext' is true, any extension is trimmed."
   [path]
   (.mkdirs (file path)))
 
-(def ^{:doc "The root of a unix system is /, nil on Windows"} 
+(def ^{:doc "The root of a unix system is /, nil on Windows"}
   unix-root (when (= File/separator "/") File/separator))
 
 (defn split
@@ -254,7 +254,7 @@ If 'trim-ext' is true, any extension is trimmed."
          curly-depth 0]
     (let [[c j] stream]
         (cond
-         (nil? c) (re-pattern 
+         (nil? c) (re-pattern
                     ; We add ^ and $ since we check only for file names
                     (str "^" (if (= \. (first s)) "" "(?=[^\\.])") re "$"))
          (= c \\) (recur (nnext stream) (str re c c) curly-depth)
@@ -272,16 +272,17 @@ If 'trim-ext' is true, any extension is trimmed."
 
 (defn glob
   "Returns files matching glob pattern."
-  [pattern]
-  (let [parts (split pattern)
-        root (if (= (count parts) 1) ["."] (butlast parts))
-        regex (glob->regex (last parts))]
-    (seq (.listFiles
-           ^File
-           (apply file root)
-           (reify FilenameFilter
-             (accept [_ _ filename]
-               (boolean (re-find regex filename))))))))
+  ([pattern]
+     (let [parts (split pattern)
+           root (apply file (if (= (count parts) 1) ["."] (butlast parts)))]
+       (glob root (last parts))))
+  ([^File root pattern]
+     (let [regex (glob->regex pattern)]
+       (seq (.listFiles
+             root
+             (reify FilenameFilter
+               (accept [_ _ filename]
+                 (boolean (re-find regex filename)))))))))
 
 (defn- iterzip
   "Iterate over a zip, returns a sequence of the nodes with a nil suffix"
@@ -314,7 +315,7 @@ If 'trim-ext' is true, any extension is trimmed."
 (defn walk
   "Lazily walk depth-first over the directory structure starting at
   'path' calling 'func' with three arguments [root dirs files].
-  Returns a sequence of the results." 
+  Returns a sequence of the results."
   [func path]
   (map #(apply func %) (iterate-dir path)))
 
@@ -332,7 +333,7 @@ If 'trim-ext' is true, any extension is trimmed."
   'mode' can be any combination of \"r\" (readable) \"w\" (writable) and \"x\"
   (executable). It should be prefixed with \"+\" to set or \"-\" to unset. And
   optional prefix of \"u\" causes the permissions to be set for the owner only.
-  
+
   Examples:
   (chmod \"+x\" \"/tmp/foo\") -> Sets executable for everyone
   (chmod \"u-wx\" \"/tmp/foo\") -> Unsets owner write and executable"
@@ -424,7 +425,7 @@ If 'trim-ext' is true, any extension is trimmed."
         :when (re-matches pattern (.getName f))]
     f))
 
-(defn exec 
+(defn exec
   "Execute a shell command in the current directory"
   [& body]
   (sh/with-sh-dir *cwd* (apply sh/sh body)))
@@ -447,4 +448,3 @@ If 'trim-ext' is true, any extension is trimmed."
    with-mutable-cwd"
   [path]
   (set! *cwd* (file path)))
-
