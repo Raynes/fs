@@ -194,7 +194,7 @@ If 'trim-ext' is true, any extension is trimmed."
 
 (defn create
   "Create a new file."
-  [f]
+  [^File f]
   (.createNewFile f))
 
 (defn- assert-exists [path]
@@ -421,7 +421,7 @@ If 'trim-ext' is true, any extension is trimmed."
 (defn find-files
   "Find files matching given pattern."
   [path pattern]
-  (for [f (-> path file file-seq)
+  (for [^File f (-> path file file-seq)
         :when (re-matches pattern (.getName f))]
     f))
 
