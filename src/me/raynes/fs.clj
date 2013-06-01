@@ -418,12 +418,17 @@ If 'trim-ext' is true, any extension is trimmed."
        (replace \_ \-)
        (replace \/ \.))))
 
+(defn find-files*
+  "Find files in path by pred."
+  [path pred]
+  (for [^File f (-> path file file-seq)
+        :when (pred f)]
+    f))
+
 (defn find-files
   "Find files matching given pattern."
   [path pattern]
-  (for [^File f (-> path file file-seq)
-        :when (re-matches pattern (.getName f))]
-    f))
+  (find-files* path #(re-matches pattern (.getName %))))
 
 (defn exec
   "Execute a shell command in the current directory"
