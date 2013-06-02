@@ -134,6 +134,11 @@
   [path]
   (.isFile (file path)))
 
+(defn ^Boolean hidden?
+  "Return true if path is hidden."
+  [path]
+  (.isHidden (file path)))
+
 (defn split-ext
   "Returns a vector of [name extension]."
   [path]

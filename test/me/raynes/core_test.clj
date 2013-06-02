@@ -332,3 +332,9 @@
  (let [fs1 (find-files test-files-path #"ggg\.*")
        fs2 (find-files* test-files-path #(re-matches #"ggg\.*" (.getName %)))]
    (= fs1 fs2) => true))
+
+(fact
+ (let [f (touch (io/file test-files-path ".hidden"))]
+   (hidden? f)
+   (delete f)))
+
