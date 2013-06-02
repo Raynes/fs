@@ -5,7 +5,9 @@
             [clojure.java.io :as io]
             [clojure.string :as string]
             [clojure.java.shell :as sh])
-  (:import (java.io File FilenameFilter)))
+  (:import [java.io File FilenameFilter]
+           [java.nio.file Files Path]
+           [java.nio.file.attribute FileAttribute]))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
 ;; and cannot be changed. This library will provide a way to simulate a
@@ -61,6 +63,11 @@
     (if (.isAbsolute ^File path)
       path
       (io/file *cwd* path))))
+
+(extend-protocol clojure.java.io/Coercions
+  Path
+  (as-file [this] (.toFile this))
+  (as-url [this] (. this (toFile) (toUrl))))
 
 (defn list-dir
   "List files and directories under path."
@@ -138,6 +145,29 @@
   "Return true if path is hidden."
   [path]
   (.isHidden (file path)))
+
+(defn- ^Path as-path
+  "Convert path to a java.nio.file.Path."
+  [path]
+  (.toPath (file path)))
+
+(defn ^Boolean link?
+  "Return true if path is a link."
+  [path]
+  (Files/isSymbolicLink (as-path path)))
+
+(defn ^File link
+  "Create a \"hard\" link from path to target."
+  [path target]
+  (file (Files/createLink (as-path path) (as-path target))))
+
+(defn ^File sym-link
+  "Create a \"soft\" link from path to target."
+  [path target]
+  (file (Files/createSymbolicLink
+         (as-path path)
+         (as-path target)
+         (make-array FileAttribute 0))))
 
 (defn split-ext
   "Returns a vector of [name extension]."

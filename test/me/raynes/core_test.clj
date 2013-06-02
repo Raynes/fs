@@ -338,3 +338,12 @@
    (hidden? f)
    (delete f)))
 
+(fact
+ (let [target (io/file test-files-path "ggg.tar")
+       hard (link (io/file test-files-path "hard.link") target)
+       soft (sym-link (io/file test-files-path "soft.link") target)]
+   (file? hard) => true
+   (file? soft) => true
+   (link? soft) => true
+   (delete hard)
+   (delete soft)))
