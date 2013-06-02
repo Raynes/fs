@@ -320,3 +320,15 @@
     (absolute? (str win-root "/foo/")) => true
     (absolute? "foo/bar") => false
     (absolute? "foo/") => false))
+
+(def test-files-path "test/me/raynes/testfiles")
+
+(fact
+ (let [files (find-files test-files-path #"ggg\.*")
+       gggs (map #(file (str test-files-path "/ggg." %)) '(gz tar zip))]
+   (every? (set gggs) files) => true))
+
+(fact
+ (let [fs1 (find-files test-files-path #"ggg\.*")
+       fs2 (find-files* test-files-path #(re-matches #"ggg\.*" (.getName %)))]
+   (= fs1 fs2) => true))
