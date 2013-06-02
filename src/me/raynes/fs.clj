@@ -421,9 +421,7 @@ If 'trim-ext' is true, any extension is trimmed."
 (defn find-files*
   "Find files in path by pred."
   [path pred]
-  (for [^File f (-> path file file-seq)
-        :when (pred f)]
-    f))
+  (filter pred (-> path file file-seq)))
 
 (defn find-files
   "Find files matching given pattern."
