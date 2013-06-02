@@ -109,8 +109,11 @@
 
 (defn ^String base-name
   "Return the base name (final segment/file part) of a path.
-If optional 'trim-ext' is a string and the path ends with that string, it is trimmed.
-If 'trim-ext' is true, any extension is trimmed."
+
+   If optional `trim-ext` is a string and the path ends with that string,
+   it is trimmed.
+
+   If `trim-ext` is true, any extension is trimmed."
   ([path] (.getName (file path)))
   ([path trim-ext]
      (let [base (.getName (file path))]
