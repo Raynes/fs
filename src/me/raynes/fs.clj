@@ -361,10 +361,9 @@
   "Set file modification time (default to now). Returns path."
   [path & [time]]
   (let [f (file path)]
-    (do
-      (when-not (create f)
-        (.setLastModified f (or time (System/currentTimeMillis))))
-      f)))
+    (when-not (create f)
+      (.setLastModified f (or time (System/currentTimeMillis))))
+    f))
 
 (defn chmod
   "Change file permissions. Returns path.
