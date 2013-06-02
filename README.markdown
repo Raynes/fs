@@ -38,7 +38,7 @@ definition to your `pom.xml`:
 
 With Leiningen:
 
-    [me.raynes/fs "1.4.0"]
+    [me.raynes/fs "1.4.4"]
 
 
 With Maven:
