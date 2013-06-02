@@ -49,16 +49,6 @@ With Maven:
       <version>1.4.0</version>
     </dependency>
 
-## Contributors
-
-This library was originally devised and maintained by Miki Tebeka, but [I](https://github.com/Raynes) took over for him.
-
-* [Miki Tebeka](mailto:miki.tebeka@gmail.com)
-* [Justin Kramer](mailto:jkkramer@gmail.com)
-* [Steve Miner](mailto:steveminer@gmail.com)
-* [Bronsa](mailto:brobronsa@gmail.com)
-* [Anthony Grimes](https://github.com/Raynes)
-
 ## License
 
 Copyright (C) 2010,2011,2012 Miki Tebeka, Anthony Grimes
