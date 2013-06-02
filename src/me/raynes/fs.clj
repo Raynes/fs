@@ -322,10 +322,11 @@ If 'trim-ext' is true, any extension is trimmed."
 (defn touch
   "Set file modification time (default to now). Returns path."
   [path & [time]]
-  (let [file (file path)]
-    (when-not (create file)
-      (.setLastModified file (or time (System/currentTimeMillis)))))
-  file)
+  (let [f (file path)]
+    (do
+      (when-not (create f)
+        (.setLastModified f (or time (System/currentTimeMillis))))
+      f)))
 
 (defn chmod
   "Change file permissions. Returns path.
