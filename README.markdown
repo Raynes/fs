@@ -46,7 +46,7 @@ With Maven:
     <dependency>
       <groupId>me.raynes</groupId>
       <artifactId>fs</artifactId>
-      <version>1.4.0</version>
+      <version>1.4.4</version>
     </dependency>
 
 ## License
