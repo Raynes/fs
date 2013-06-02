@@ -51,6 +51,6 @@ With Maven:
 
 ## License
 
-Copyright (C) 2010,2011,2012 Miki Tebeka, Anthony Grimes
+Copyright (C) 2010-2013 Miki Tebeka, Anthony Grimes
 
 Distributed under the Eclipse Public License, the same as Clojure.
