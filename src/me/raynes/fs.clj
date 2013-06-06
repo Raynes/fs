@@ -5,9 +5,7 @@
             [clojure.java.io :as io]
             [clojure.string :as string]
             [clojure.java.shell :as sh])
-  (:import [java.io File FilenameFilter]
-           [java.nio.file Files Path]
-           [java.nio.file.attribute FileAttribute]))
+  (:import [java.io File FilenameFilter]))
 
 ;; Once you've started a JVM, that JVM's working directory is set in stone
 ;; and cannot be changed. This library will provide a way to simulate a
@@ -63,11 +61,6 @@
     (if (.isAbsolute ^File path)
       path
       (io/file *cwd* path))))
-
-(extend-protocol clojure.java.io/Coercions
-  Path
-  (as-file [this] (.toFile this))
-  (as-url [this] (. this (toFile) (toUrl))))
 
 (defn list-dir
   "List files and directories under path."
@@ -146,28 +139,45 @@
   [path]
   (.isHidden (file path)))
 
-(defn- ^Path as-path
-  "Convert path to a java.nio.file.Path."
-  [path]
-  (.toPath (file path)))
+(defmacro ^:private include-java-7-fns []
+  (when (try (import '[java.nio.file Files Path]
+                     '[java.nio.file.attribute FileAttribute])
+             (catch Exception _ nil))
 
-(defn ^Boolean link?
-  "Return true if path is a link."
-  [path]
-  (Files/isSymbolicLink (as-path path)))
+    '(do
+      (extend-protocol io/Coercions
+       Path
+       (as-file [this] (.toFile this))
+       (as-url [this] (. this (toFile) (toUrl))))
 
-(defn ^File link
-  "Create a \"hard\" link from path to target."
-  [path target]
-  (file (Files/createLink (as-path path) (as-path target))))
+      (defn- ^Path as-path
+        "Convert path to a java.nio.file.Path.
+       Requires Java version 7 or greater."
+        [path]
+        (.toPath (file path)))
 
-(defn ^File sym-link
-  "Create a \"soft\" link from path to target."
-  [path target]
-  (file (Files/createSymbolicLink
-         (as-path path)
-         (as-path target)
-         (make-array FileAttribute 0))))
+      (defn ^Boolean link?
+        "Return true if path is a link.
+       Requires Java version 7 or greater."
+        [path]
+        (Files/isSymbolicLink (as-path path)))
+
+      (defn ^File link
+        "Create a \"hard\" link from path to target.
+       Requires Java version 7 or greater."
+        [path target]
+        (file (Files/createLink (as-path path) (as-path target))))
+
+      (defn ^File sym-link
+        "Create a \"soft\" link from path to target.
+       Requires Java version 7 or greater."
+        [path target]
+        (file (Files/createSymbolicLink
+               (as-path path)
+               (as-path target)
+               (make-array FileAttribute 0)))))))
+
+(include-java-7-fns)
 
 (defn split-ext
   "Returns a vector of [name extension]."
