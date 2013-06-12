@@ -321,29 +321,36 @@
     (absolute? "foo/bar") => false
     (absolute? "foo/") => false))
 
-(def test-files-path "test/me/raynes/testfiles")
+(defmacro run-java-7-tests []
+  (when (try (import '[java.nio.file Files Path]
+                     '[java.nio.file.attribute FileAttribute])
+             (catch Exception _ nil))
+    '(do
+       (def test-files-path "test/me/raynes/testfiles")
 
-(fact
- (let [files (find-files test-files-path #"ggg\.*")
-       gggs (map #(file (str test-files-path "/ggg." %)) '(gz tar zip))]
-   (every? (set gggs) files) => true))
+       (fact
+        (let [files (find-files test-files-path #"ggg\.*")
+              gggs (map #(file (str test-files-path "/ggg." %)) '(gz tar zip))]
+          (every? (set gggs) files) => true))
 
-(fact
- (let [fs1 (find-files test-files-path #"ggg\.*")
-       fs2 (find-files* test-files-path #(re-matches #"ggg\.*" (.getName %)))]
-   (= fs1 fs2) => true))
+       (fact
+        (let [fs1 (find-files test-files-path #"ggg\.*")
+              fs2 (find-files* test-files-path #(re-matches #"ggg\.*" (.getName %)))]
+          (= fs1 fs2) => true))
 
-(fact
- (let [f (touch (io/file test-files-path ".hidden"))]
-   (hidden? f)
-   (delete f)))
+       (fact
+        (let [f (touch (io/file test-files-path ".hidden"))]
+          (hidden? f)
+          (delete f)))
 
-(fact
- (let [target (io/file test-files-path "ggg.tar")
-       hard (link (io/file test-files-path "hard.link") target)
-       soft (sym-link (io/file test-files-path "soft.link") target)]
-   (file? hard) => true
-   (file? soft) => true
-   (link? soft) => true
-   (delete hard)
-   (delete soft)))
+       (fact
+        (let [target (io/file test-files-path "ggg.tar")
+              hard (link (io/file test-files-path "hard.link") target)
+              soft (sym-link (io/file test-files-path "soft.link") target)]
+          (file? hard) => true
+          (file? soft) => true
+          (link? soft) => true
+          (delete hard)
+          (delete soft))))))
+
+(run-java-7-tests)
