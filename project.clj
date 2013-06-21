@@ -1,4 +1,4 @@
-(defproject me.raynes/fs "1.4.4"
+(defproject me.raynes/fs "1.4.5"
   :description "File system utilities for clojure"
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
