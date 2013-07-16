@@ -432,7 +432,7 @@
   "Delete a directory tree."
   [root]
   (when (directory? root)
-    (doseq [path (map #(file root %) (.list (file root)))]
+    (doseq [path (.listFiles (file root))]
       (delete-dir path)))
   (delete root))
 
