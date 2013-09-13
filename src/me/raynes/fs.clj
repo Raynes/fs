@@ -297,14 +297,16 @@
 (defn- glob->regex
   "Takes a glob-format string and returns a regex."
   [s]
-  (loop [stream s
-         re ""
-         curly-depth 0]
-    (let [[c j] stream]
+  (let [ignore-case? (= "(?i)" (subs s 0 4))]
+    (loop [stream (if ignore-case? (subs s 4) s)
+           re ""
+           curly-depth 0]
+      (let [[c j] stream]
         (cond
          (nil? c) (re-pattern
-                    ; We add ^ and $ since we check only for file names
-                    (str "^" (if (= \. (first s)) "" "(?=[^\\.])") re "$"))
+                   ; We add ^ and $ since we check only for file names
+                   (str (when ignore-case? "(?i)")
+                        "^" (if (= \. (first s)) "" "(?=[^\\.])") re "$"))
          (= c \\) (recur (nnext stream) (str re c c) curly-depth)
          (= c \/) (recur (next stream) (str re (if (= \. j) c "/(?=[^\\.])"))
                          curly-depth)
@@ -316,7 +318,7 @@
                                                  curly-depth)
          (#{\. \( \) \| \+ \^ \$ \@ \%} c) (recur (next stream) (str re \\ c)
                                                   curly-depth)
-         :else (recur (next stream) (str re c) curly-depth)))))
+         :else (recur (next stream) (str re c) curly-depth))))))
 
 (defn glob
   "Returns files matching glob pattern."
