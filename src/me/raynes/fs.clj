@@ -140,7 +140,7 @@
   (.isHidden (file path)))
 
 (defmacro ^:private include-java-7-fns []
-  (when (try (import '[java.nio.file Files Path]
+  (when (try (import '[java.nio.file Files Path LinkOption]
                      '[java.nio.file.attribute FileAttribute])
              (catch Exception _ nil))
 
@@ -175,7 +175,16 @@
         (file (Files/createSymbolicLink
                (as-path path)
                (as-path target)
-               (make-array FileAttribute 0)))))))
+               (make-array FileAttribute 0))))
+
+      ;; Rewrite directory? to include LinkOptions.
+      (defn directory?
+        "Return true if path is a directory, false otherwise.  Optional
+       LinkOptions may be provided to determine whether or not to follow
+       symbolic links."
+        [path & link-options]
+        (Files/isDirectory (as-path path)
+                           (into-array LinkOption link-options))))))
 
 (include-java-7-fns)
 

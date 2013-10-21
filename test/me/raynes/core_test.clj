@@ -156,7 +156,7 @@
   (let [root (create-walk-dir)]
     (walk vector root) => (contains [[root #{"b" "a"} #{"1"}]
                                      [(file root "a") #{} #{"2"}]
-                                     [(file root "b") #{} #{"3"}]] 
+                                     [(file root "b") #{} #{"3"}]]
                                     :in-any-order)
     (delete-dir root)))
 
@@ -214,7 +214,7 @@
 
 (tabular
   (fact (split-ext ?file) => ?ext)
-  
+
     ?file            ?ext
     "fs.clj"        ["fs" ".clj"]
     "fs."           ["fs" "."]
@@ -225,7 +225,7 @@
 
 (tabular
   (fact (extension ?file) => ?ext)
-  
+
     ?file            ?ext
     "fs.clj"        ".clj"
     "fs."           "."
@@ -236,7 +236,7 @@
 
 (tabular
   (fact (name ?file) => ?ext)
-  
+
     ?file            ?ext
     "fs.clj"        "fs"
     "fs."           "fs"
@@ -322,7 +322,7 @@
     (absolute? "foo/") => false))
 
 (defmacro run-java-7-tests []
-  (when (try (import '[java.nio.file Files Path]
+  (when (try (import '[java.nio.file Files Path LinkOption]
                      '[java.nio.file.attribute FileAttribute])
              (catch Exception _ nil))
     '(do
@@ -351,6 +351,14 @@
           (file? soft) => true
           (link? soft) => true
           (delete hard)
+          (delete soft)))
+
+       (fact
+        (let [soft (sym-link (io/file test-files-path "soft.link") test-files-path)]
+          (link? soft) => true
+          (file? soft) => false
+          (directory? soft) => true
+          (directory? soft LinkOption/NOFOLLOW_LINKS) => false
           (delete soft))))))
 
 (run-java-7-tests)
