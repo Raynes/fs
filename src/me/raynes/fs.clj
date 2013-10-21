@@ -139,6 +139,14 @@
   [path]
   (.isHidden (file path)))
 
+(defn delete-dir
+  "Delete a directory tree."
+  [root]
+  (when (directory? root)
+    (doseq [path (.listFiles (file root))]
+      (delete-dir path)))
+  (delete root))
+
 (defmacro ^:private include-java-7-fns []
   (when (try (import '[java.nio.file Files Path LinkOption]
                      '[java.nio.file.attribute FileAttribute])
@@ -177,14 +185,23 @@
                (as-path target)
                (make-array FileAttribute 0))))
 
-      ;; Rewrite directory? to include LinkOptions.
+      ;; Rewrite directory? and delete-dir to include LinkOptions.
       (defn directory?
         "Return true if path is a directory, false otherwise.  Optional
        LinkOptions may be provided to determine whether or not to follow
        symbolic links."
         [path & link-options]
         (Files/isDirectory (as-path path)
-                           (into-array LinkOption link-options))))))
+                           (into-array LinkOption link-options)))
+
+      (defn delete-dir
+        "Delete a directory tree.  Optional LinkOptions may be provided to
+       determine whether or not to follow symbolic links."
+        [root & link-options]
+        (when (apply directory? root link-options)
+          (doseq [path (.listFiles (file root))]
+            (apply delete-dir path link-options)))
+        (delete root)))))
 
 (include-java-7-fns)
 
@@ -436,14 +453,6 @@
                    (copy+ (file root f) (dest (file root f)))))
                from))
         to))))
-
-(defn delete-dir
-  "Delete a directory tree."
-  [root]
-  (when (directory? root)
-    (doseq [path (.listFiles (file root))]
-      (delete-dir path)))
-  (delete root))
 
 (defn parents
   "Get all the parent directories of a path."
