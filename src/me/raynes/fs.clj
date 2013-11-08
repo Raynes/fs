@@ -70,22 +70,30 @@
 (defn absolute?
   "Return true if path is absolute."
   [path]
-  (.isAbsolute (io/file path)))
+  (if (nil? path)
+    false
+    (.isAbsolute (io/file path))))
 
 (defn executable?
   "Return true if path is executable."
   [path]
-  (.canExecute (file path)))
+  (if (nil? path)
+    false
+    (.canExecute (file path))))
 
 (defn readable?
   "Return true if path is readable."
   [path]
-  (.canRead (file path)))
+  (if (nil? path)
+    false
+    (.canRead (file path))))
 
 (defn writeable?
   "Return true if path is writeable."
   [path]
-  (.canWrite (file path)))
+  (if (nil? path)
+    false
+    (.canWrite (file path))))
 
 (defn delete
   "Delete path."
@@ -95,7 +103,9 @@
 (defn exists?
   "Return true if path exists."
   [path]
-  (.exists (file path)))
+  (if (nil? path)
+    false
+    (.exists (file path))))
 
 (defn absolute-path
   "Return absolute path."
@@ -127,17 +137,23 @@
 (defn directory?
   "Return true if path is a directory."
   [path]
-  (.isDirectory (file path)))
+  (if (nil? path)
+    false
+    (.isDirectory (file path))))
 
 (defn file?
   "Return true if path is a file."
   [path]
-  (.isFile (file path)))
+  (if (nil? path)
+    false
+    (.isFile (file path))))
 
 (defn ^Boolean hidden?
   "Return true if path is hidden."
   [path]
-  (.isHidden (file path)))
+  (if (nil? path)
+    false
+    (.isHidden (file path))))
 
 (defmacro ^:private include-java-7-fns []
   (when (try (import '[java.nio.file Files Path]
