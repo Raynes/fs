@@ -67,35 +67,41 @@
   [path]
   (seq (.list (file path))))
 
+
+(defmacro predicate [s path]
+  `(if ~path
+     (. ~path ~s)
+     false))
+
 (defn absolute?
   "Return true if path is absolute."
   [path]
-  (.isAbsolute (io/file path)))
+  (predicate isAbsolute (io/file path)))
 
 (defn executable?
   "Return true if path is executable."
   [path]
-  (.canExecute (file path)))
+  (predicate canExecute (file path)))
 
 (defn readable?
   "Return true if path is readable."
   [path]
-  (.canRead (file path)))
+  (predicate canRead (file path)))
 
 (defn writeable?
   "Return true if path is writeable."
   [path]
-  (.canWrite (file path)))
+  (predicate canWrite (file path)))
 
 (defn delete
   "Delete path."
   [path]
-  (.delete (file path)))
+  (predicate delete (file path)))
 
 (defn exists?
   "Return true if path exists."
   [path]
-  (.exists (file path)))
+  (predicate exists (file path)))
 
 (defn absolute-path
   "Return absolute path."
@@ -127,17 +133,17 @@
 (defn directory?
   "Return true if path is a directory."
   [path]
-  (.isDirectory (file path)))
+  (predicate isDirectory (file path)))
 
 (defn file?
   "Return true if path is a file."
   [path]
-  (.isFile (file path)))
+  (predicate isFile (file path)))
 
 (defn ^Boolean hidden?
   "Return true if path is hidden."
   [path]
-  (.isHidden (file path)))
+  (predicate isHidden (file path)))
 
 (defmacro ^:private include-java-7-fns []
   (when (try (import '[java.nio.file Files Path]
