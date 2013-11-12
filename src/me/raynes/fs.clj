@@ -108,6 +108,12 @@
   [path]
   (.getAbsolutePath (file path)))
 
+(defn relative-path
+  "Return the relative path."
+  [path]
+  (.substring (absolute-path path)
+              (inc (count (absolute-path *cwd*)))))
+
 (defn normalized-path
   "Return normalized (canonical) path."
   [path]
