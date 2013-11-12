@@ -68,7 +68,7 @@
   (seq (.list (file path))))
 
 
-(defmacro predicate [s path]
+(defmacro ^:private predicate [s path]
   `(if ~path
      (. ~path ~s)
      false))
