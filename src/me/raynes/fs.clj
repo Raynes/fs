@@ -102,13 +102,13 @@
   [path]
   (predicate exists (file path)))
 
-(defn absolute-path
-  "Return absolute path."
+(defn absolute
+  "Return absolute file."
   [path]
-  (.getAbsolutePath (file path)))
+  (.getAbsoluteFile (file path)))
 
-(defn normalized-path
-  "Return normalized (canonical) path."
+(defn normalized
+  "Return normalized (canonical) file."
   [path]
   (.getCanonicalFile (file path)))
 

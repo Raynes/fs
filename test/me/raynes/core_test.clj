@@ -92,10 +92,10 @@
     (delete tmp)))
 
 (fact
-  (absolute-path "foo") => (str (io/file *cwd* "foo")))
+  (absolute "foo") => (io/file *cwd* "foo"))
 
 (fact
-  (normalized-path ".") => *cwd*)
+  (normalized ".") => *cwd*)
 
 (fact
   (base-name "foo/bar") => "bar"
