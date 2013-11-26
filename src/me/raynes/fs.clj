@@ -278,11 +278,12 @@
 (defn- temp-create
   "Create a temporary file or dir, trying n times before giving up."
   ([prefix suffix tries f]
-     (loop [tries (range tries)]
-       (let [tmp (file (tmpdir) (temp-name prefix suffix))]
-         (if (and (seq tries) (f tmp))
+   (let [tmp (file (tmpdir) (temp-name prefix suffix))]
+     (loop [tries tries]
+       (when (pos? tries)
+         (if (f tmp)
            tmp
-           (recur (rest tries)))))))
+           (recur (dec tries))))))))
 
 (defn temp-file
   "Create a temporary file. Returns nil if file could not be created
@@ -296,7 +297,7 @@
    even after n tries (default 10)."
   ([prefix]              (temp-dir prefix "" 10))
   ([prefix suffix]       (temp-dir prefix suffix 10))
-  ([prefix suffix tries] (temp-create prefix suffix tries mkdir)))
+  ([prefix suffix tries] (temp-create prefix suffix tries mkdirs)))
 
 ; Taken from https://github.com/jkk/clj-glob. (thanks Justin!)
 (defn- glob->regex
