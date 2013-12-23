@@ -169,9 +169,11 @@
 
       (defn ^File link
         "Create a \"hard\" link from path to target.
-       Requires Java version 7 or greater."
-        [path target]
-        (file (Files/createLink (as-path path) (as-path target))))
+       Requires Java version 7 or greater.  The arguments
+       are in the opposite order from the link(2) system
+       call."
+        [new-file existing-file]
+        (file (Files/createLink (as-path new-file) (as-path existing-file))))
 
       (defn ^File sym-link
         "Create a \"soft\" link from path to target.
