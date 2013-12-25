@@ -153,7 +153,7 @@
       (extend-protocol io/Coercions
        Path
        (as-file [this] (.toFile this))
-       (as-url [this] (. this (toFile) (toUrl))))
+       (as-url [this] (.. this (toFile) (toUrl))))
 
       (defn- ^Path as-path
         "Convert path to a java.nio.file.Path.
