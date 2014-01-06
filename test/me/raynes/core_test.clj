@@ -350,6 +350,7 @@
           (file? hard) => true
           (file? soft) => true
           (link? soft) => true
+          (= (read-sym-link soft) target)
           (delete hard)
           (delete soft))))))
 
