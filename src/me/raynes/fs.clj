@@ -183,8 +183,8 @@
                (make-array FileAttribute 0))))
 
        (defn ^File read-sym-link
-         "Returns the target of a \"soft\" link.
-         Requires Java version 7 or greater."
+         "Return the target of a 'soft' link.
+          Requires Java version 7 or greater."
          [path]
          (file (Files/readSymbolicLink (as-path path)))))))
 
