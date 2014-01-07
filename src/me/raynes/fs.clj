@@ -180,7 +180,13 @@
         (file (Files/createSymbolicLink
                (as-path path)
                (as-path target)
-               (make-array FileAttribute 0)))))))
+               (make-array FileAttribute 0))))
+
+       (defn ^File read-sym-link
+         "Return the target of a 'soft' link.
+          Requires Java version 7 or greater."
+         [path]
+         (file (Files/readSymbolicLink (as-path path)))))))
 
 (include-java-7-fns)
 
