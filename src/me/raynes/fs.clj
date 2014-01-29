@@ -284,8 +284,8 @@
 (defn- temp-create
   "Create a temporary file or dir, trying n times before giving up."
   ([prefix suffix tries f]
-   (let [tmp (file (tmpdir) (temp-name prefix suffix))]
-     (loop [tries tries]
+   (loop [tries tries]
+     (let [tmp (file (tmpdir) (temp-name prefix suffix))]
        (when (pos? tries)
          (if (f tmp)
            tmp
