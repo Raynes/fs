@@ -161,7 +161,7 @@
   (let [root (create-walk-dir)]
     (walk vector root) => (contains [[root #{"b" "a"} #{"1"}]
                                      [(file root "a") #{} #{"2"}]
-                                     [(file root "b") #{} #{"3"}]] 
+                                     [(file root "b") #{} #{"3"}]]
                                     :in-any-order)
     (delete-dir root)))
 
@@ -219,7 +219,7 @@
 
 (tabular
   (fact (split-ext ?file) => ?ext)
-  
+
     ?file            ?ext
     "fs.clj"        ["fs" ".clj"]
     "fs."           ["fs" "."]
@@ -230,7 +230,7 @@
 
 (tabular
   (fact (extension ?file) => ?ext)
-  
+
     ?file            ?ext
     "fs.clj"        ".clj"
     "fs."           "."
@@ -241,7 +241,7 @@
 
 (tabular
   (fact (name ?file) => ?ext)
-  
+
     ?file            ?ext
     "fs.clj"        "fs"
     "fs."           "fs"
