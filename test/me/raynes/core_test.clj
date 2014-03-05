@@ -8,7 +8,6 @@
   (:import java.io.File))
 
 (def system-tempdir (System/getProperty "java.io.tmpdir"))
-(def on-windows? (= File/separator "\\"))
 
 (defn create-walk-dir []
   (let [root (temp-dir "fs-")]
