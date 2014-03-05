@@ -8,6 +8,7 @@
   (:import java.io.File))
 
 (def system-tempdir (System/getProperty "java.io.tmpdir"))
+(def on-windows? (= File/separator "\\"))
 
 (defn create-walk-dir []
   (let [root (temp-dir "fs-")]
@@ -25,6 +26,7 @@
 (fact "Expands path to current user."
   (let [user (System/getProperty "user.home")]
     (expand-home "~") => (file user)
+    (expand-home "~/foo") => (file user "foo")
     (expand-home (str "~" File/separator "foo")) => (file user "foo")))
 
 (fact "Expands to given user."
