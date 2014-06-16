@@ -205,6 +205,17 @@
     (delete-dir from)
     (delete-dir to)))
 
+(fact "copy-dir-into works as expected."
+  (let [from (create-walk-dir)
+        to (temp-dir "fs-")]
+    (copy-dir-into from to)
+    (walk vector to) => (contains [[(file to) #{"a" "b"} #{"1"}]
+                                   [(file to "a") #{} #{"2"}]
+                                   [(file to "b") #{} #{"3"}]]
+                                  :in-any-order)
+    (delete-dir from)
+    (delete-dir to)))
+
 (when (System/getenv "HOME")
   (fact
    (let [env-home (io/file (System/getenv "HOME"))]
