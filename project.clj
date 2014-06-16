@@ -5,7 +5,7 @@
   :url "https://github.com/Raynes/fs"
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.apache.commons/commons-compress "1.8"]]
-  :plugins [[lein-midje "3.0-alpha4"]
+  :plugins [[lein-midje "3.1.3"]
             [codox "0.6.7"]]
-  :repositories {"releases" :clojars}
-  :profiles {:dev {:dependencies [[midje "1.5-alpha8"]]}})
+  :deploy-repositories {"releases" :clojars}
+  :profiles {:dev {:dependencies [[midje "1.6.3"]]}})
