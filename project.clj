@@ -7,4 +7,5 @@
                  [org.apache.commons/commons-compress "1.8"]]
   :plugins [[lein-midje "3.0-alpha4"]
             [codox "0.6.7"]]
+  :repositories {"releases" :clojars}
   :profiles {:dev {:dependencies [[midje "1.5-alpha8"]]}})
