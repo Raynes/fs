@@ -466,6 +466,16 @@
                from))
         to))))
 
+(defn copy-dir-into
+  "Copy directory into another directory if destination already exists."
+  [from to]
+  (if-not (exists? to)
+    (copy-dir from to)
+    (doseq [file (list-dir from)]
+      (if (directory? file)
+        (copy-dir file to)
+        (copy file (io/file to (base-name file)))))))
+
 (defn parents
   "Get all the parent directories of a path."
   [f]
