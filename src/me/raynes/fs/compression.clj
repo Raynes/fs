@@ -24,12 +24,12 @@
 
 (defn- add-zip-entry
   "Add a zip entry. Works for strings and byte-arrays."
-  [zip-output-stream [name content & remain]]
+  [^java.util.zip.ZipOutputStream zip-output-stream [^String name content & remain]]
   (.putNextEntry zip-output-stream (java.util.zip.ZipEntry. name))
   (if (string? content) ;string and byte-array must have different methods
     (doto (java.io.PrintStream. zip-output-stream true)
       (.print content))
-    (.write zip-output-stream content))
+    (.write zip-output-stream ^bytes content))
   (.closeEntry zip-output-stream)
   (when (seq (drop 1 remain))
     (recur zip-output-stream remain)))

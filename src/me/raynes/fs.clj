@@ -514,7 +514,7 @@
 (defn find-files
   "Find files matching given pattern."
   [path pattern]
-  (find-files* path #(re-matches pattern (.getName %))))
+  (find-files* path #(re-matches pattern (.getName ^File %))))
 
 (defn exec
   "Execute a shell command in the current directory"
