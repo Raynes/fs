@@ -8,6 +8,7 @@
   :plugins [[lein-midje "3.1.3"]
             [codox "0.8.10"]]
   :codox {:src-dir-uri "https://github.com/Raynes/fs/blob/master/"
-          :src-linenum-anchor-prefix "L"}
+          :src-linenum-anchor-prefix "L"
+          :defaults {:doc/format :markdown}}
   :deploy-repositories {"releases" :clojars}
   :profiles {:dev {:dependencies [[midje "1.6.3"]]}})

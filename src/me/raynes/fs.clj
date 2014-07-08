@@ -22,20 +22,21 @@
 (let [homedir (io/file (System/getProperty "user.home"))
       usersdir (.getParent homedir)]
   (defn home
-    "With no arguments, returns the current value of the user.home system
-     property. If a user is passed, returns that user's home directory. It
-     is naively assumed to be a directory with the same name as the user
-     located relative to the parent of the current value of user.home."
+    "With no arguments, returns the current value of the `user.home` system
+     property. If a `user` is passed, returns that user's home directory. It
+     is naively assumed to be a directory with the same name as the `user`
+     located relative to the parent of the current value of `user.home`."
     ([] homedir)
     ([user] (if (empty? user) homedir (io/file usersdir user)))))
 
 (defn expand-home
-  "If path begins with a tilde (~), expand the tilde to the value
-   of the user.home system property. If the path begins with a tilde
-   immediately followed by some characters, they are assumed to be a
-   username. This is expanded to the path to that user's home directory.
-   This is (naively) assumed to be a directory with the same name as the
-   user relative to the parent of the current value of user.home."
+  "If `path` begins with a tilde (`~`), expand the tilde to the value
+  of the `user.home` system property. If the `path` begins with a
+  tilde immediately followed by some characters, they are assumed to
+  be a username. This is expanded to the path to that user's home
+  directory. This is (naively) assumed to be a directory with the same
+  name as the user relative to the parent of the current value of
+  `user.home`."
   [path]
   (let [path (str path)]
     (if (.startsWith path "~")
@@ -48,10 +49,10 @@
 ;; Library functions will call this function on paths/files so that
 ;; we get the cwd effect on them.
 (defn ^File file
-  "If path is a period, replaces it with cwd and creates a new File object
-   out of it and paths. Or, if the resulting File object does not constitute
+  "If `path` is a period, replaces it with cwd and creates a new File object
+   out of it and `paths`. Or, if the resulting File object does not constitute
    an absolute path, makes it absolutely by creating a new File object out of
-   the paths and cwd."
+   the `paths` and cwd."
   [path & paths]
   (when-let [path (apply
                    io/file (if (= path ".")
@@ -63,7 +64,7 @@
       (io/file *cwd* path))))
 
 (defn list-dir
-  "List files and directories under path."
+  "List files and directories under `path`."
   [path]
   (seq (.listFiles (file path))))
 
@@ -73,32 +74,32 @@
      false))
 
 (defn absolute?
-  "Return true if path is absolute."
+  "Return true if `path` is absolute."
   [path]
   (predicate isAbsolute (io/file path)))
 
 (defn executable?
-  "Return true if path is executable."
+  "Return true if `path` is executable."
   [path]
   (predicate canExecute (file path)))
 
 (defn readable?
-  "Return true if path is readable."
+  "Return true if `path` is readable."
   [path]
   (predicate canRead (file path)))
 
 (defn writeable?
-  "Return true if path is writeable."
+  "Return true if `path` is writeable."
   [path]
   (predicate canWrite (file path)))
 
 (defn delete
-  "Delete path."
+  "Delete `path`."
   [path]
   (predicate delete (file path)))
 
 (defn exists?
-  "Return true if path exists."
+  "Return true if `path` exists."
   [path]
   (predicate exists (file path)))
 
@@ -113,10 +114,10 @@
   (.getCanonicalFile (file path)))
 
 (defn ^String base-name
-  "Return the base name (final segment/file part) of a path.
+  "Return the base name (final segment/file part) of a `path`.
 
-   If optional `trim-ext` is a string and the path ends with that string,
-   it is trimmed.
+   If optional `trim-ext` is a string and the `path` ends with that
+   string, it is trimmed.
 
    If `trim-ext` is true, any extension is trimmed."
   ([path] (.getName (file path)))
@@ -130,17 +131,17 @@
              :else base))))
 
 (defn directory?
-  "Return true if path is a directory."
+  "Return true if `path` is a directory."
   [path]
   (predicate isDirectory (file path)))
 
 (defn file?
-  "Return true if path is a file."
+  "Return true if `path` is a file."
   [path]
   (predicate isFile (file path)))
 
 (defn ^Boolean hidden?
-  "Return true if path is hidden."
+  "Return true if `path` is hidden."
   [path]
   (predicate isHidden (file path)))
 
@@ -164,25 +165,25 @@
        (as-url [this] (.. this (toFile) (toURL))))
 
       (defn- ^Path as-path
-        "Convert path to a java.nio.file.Path.
+        "Convert `path` to a `java.nio.file.Path`.
        Requires Java version 7 or greater."
         [path]
         (.toPath (file path)))
 
       (defn ^Boolean link?
-        "Return true if path is a link.
+        "Return true if `path` is a link.
        Requires Java version 7 or greater."
         [path]
         (Files/isSymbolicLink (as-path path)))
 
       (defn ^File link
-        "Create a \"hard\" link from path to target.
+        "Create a \"hard\" link from `path` to `target`.
        Requires Java version 7 or greater."
         [path target]
         (file (Files/createLink (as-path path) (as-path target))))
 
       (defn ^File sym-link
-        "Create a \"soft\" link from path to target.
+        "Create a \"soft\" link from `path` to `target`.
        Requires Java version 7 or greater."
         [path target]
         (file (Files/createSymbolicLink
@@ -198,16 +199,20 @@
 
       ;; Rewrite directory? and delete-dir to include LinkOptions.
       (defn directory?
-        "Return true if path is a directory, false otherwise.  Optional
-       LinkOptions may be provided to determine whether or not to follow
-       symbolic links."
+        "Return true if `path` is a directory, false otherwise.
+        Optional
+        [link-options](http://docs.oracle.com/javase/7/docs/api/java/nio/file/LinkOption.html)
+        may be provided to determine whether or not to follow symbolic
+        links."
         [path & link-options]
         (Files/isDirectory (as-path path)
                            (into-array LinkOption link-options)))
 
       (defn delete-dir
-        "Delete a directory tree.  Optional LinkOptions may be provided to
-       determine whether or not to follow symbolic links."
+        "Delete a directory tree. Optional
+       [link-options](http://docs.oracle.com/javase/7/docs/api/java/nio/file/LinkOption.html)
+       may be provided to determine whether or not to follow symbolic
+       links."
         [root & link-options]
         (when (apply directory? root link-options)
           (doseq [path (.listFiles (file root))]
@@ -217,7 +222,7 @@
 (include-java-7-fns)
 
 (defn split-ext
-  "Returns a vector of [name extension]."
+  "Returns a vector of `[name extension]`."
   [path]
   (let [base (base-name path)
         i (.lastIndexOf base ".")]
@@ -258,11 +263,11 @@
   [path]
   (.mkdirs (file path)))
 
-(def ^{:doc "The root of a unix system is /, nil on Windows"}
+(def ^{:doc "The root of a unix system is `/`, `nil` on Windows"}
   unix-root (when (= File/separator "/") File/separator))
 
 (defn split
-  "Split path to components."
+  "Split `path` to components."
   [path]
   (let [pathstr (str path)
         jregx (str "\\Q" File/separator "\\E")]
@@ -273,7 +278,7 @@
           :else (seq (.split pathstr jregx)))))
 
 (defn rename
-  "Rename old-path to new-path. Only works on files."
+  "Rename `old-path` to `new-path`. Only works on files."
   [old-path new-path]
   (.renameTo (file old-path) (file new-path)))
 
@@ -287,21 +292,21 @@
     (throw (IllegalArgumentException. (str path " not found")))))
 
 (defn copy
-  "Copy a file from 'from' to 'to'. Return 'to'."
+  "Copy a file from `from` to `to`. Return `to`."
   [from to]
   (assert-exists from)
   (io/copy (file from) (file to))
   to)
 
 (defn tmpdir
-  "The temporary file directory looked up via the java.io.tmpdir
+  "The temporary file directory looked up via the `java.io.tmpdir`
    system property. Does not create a temporary directory."
   []
   (System/getProperty "java.io.tmpdir"))
 
 (defn temp-name
-  "Create a temporary file name like what is created for temp-file
-   and temp-dir."
+  "Create a temporary file name like what is created for [[temp-file]]
+   and [[temp-dir]]."
   ([prefix] (temp-name prefix ""))
   ([prefix suffix]
      (format "%s%s-%s%s" prefix (System/currentTimeMillis)
@@ -394,19 +399,19 @@
     [root dirs files]))
 
 (defn iterate-dir
-  "Return a sequence [root dirs files], starting from 'path' in depth-first order"
+  "Return a sequence `[root dirs files]`, starting from `path` in depth-first order"
   [path]
   (map walk-map-fn (iterate-dir* path)))
 
 (defn walk
   "Lazily walk depth-first over the directory structure starting at
-  'path' calling 'func' with three arguments [root dirs files].
+  `path` calling `func` with three arguments `[root dirs files]`.
   Returns a sequence of the results."
   [func path]
   (map #(apply func %) (iterate-dir path)))
 
 (defn touch
-  "Set file modification time (default to now). Returns path."
+  "Set file modification time (default to now). Returns `path`."
   [path & [time]]
   (let [f (file path)]
     (when-not (create f)
@@ -416,13 +421,17 @@
 (defn chmod
   "Change file permissions. Returns path.
 
-  'mode' can be any combination of \"r\" (readable) \"w\" (writable) and \"x\"
-  (executable). It should be prefixed with \"+\" to set or \"-\" to unset. And
-  optional prefix of \"u\" causes the permissions to be set for the owner only.
+  `mode` can be any combination of `r` (readable) `w` (writable) and
+  `x` (executable). It should be prefixed with `+` to set or `-` to
+  unset. And optional prefix of `u` causes the permissions to be set
+  for the owner only.
 
   Examples:
-  (chmod \"+x\" \"/tmp/foo\") -> Sets executable for everyone
-  (chmod \"u-wx\" \"/tmp/foo\") -> Unsets owner write and executable"
+
+  ```
+  (chmod \"+x\" \"/tmp/foo\") ; Sets executable for everyone
+  (chmod \"u-wx\" \"/tmp/foo\") ; Unsets owner write and executable
+  ```"
   [mode path]
   (assert-exists path)
   (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
@@ -437,14 +446,14 @@
     path))
 
 (defn copy+
-  "Copy src to dest, create directories if needed."
+  "Copy `src` to `dest`, create directories if needed."
   [src dest]
   (mkdirs (parent dest))
   (copy src dest))
 
 (defn copy-dir
-  "Copy a directory from 'from' to 'to'. If 'to' already exists, copy the directory
-   to a directory with the same name as 'from' within the 'to' directory."
+  "Copy a directory from `from` to `to`. If `to` already exists, copy the directory
+   to a directory with the same name as `from` within the `to` directory."
   [from to]
   (when (exists? from)
     (if (file? to)
@@ -498,7 +507,7 @@
         ".clj")))
 
 (defn path-ns
-  "Takes a path to a Clojure file and constructs a namespace symbol
+  "Takes a `path` to a Clojure file and constructs a namespace symbol
    out of the path."
   [path]
   (symbol
@@ -507,12 +516,12 @@
        (replace \/ \.))))
 
 (defn find-files*
-  "Find files in path by pred."
+  "Find files in `path` by `pred`."
   [path pred]
   (filter pred (-> path file file-seq)))
 
 (defn find-files
-  "Find files matching given pattern."
+  "Find files matching given `pattern`."
   [path pattern]
   (find-files* path #(re-matches pattern (.getName ^File %))))
 
@@ -522,20 +531,20 @@
   (sh/with-sh-dir *cwd* (apply sh/sh body)))
 
 (defmacro with-cwd
-  "Execute body with a changed working directory."
+  "Execute `body` with a changed working directory."
   [cwd & body]
   `(binding [*cwd* (file ~cwd)]
      ~@body))
 
 (defmacro with-mutable-cwd
-  "Execute the body in a binding with *cwd* bound to *cwd*.
-   This allows you to change *cwd* with set!."
+  "Execute the `body` in a binding with `*cwd*` bound to `*cwd*`.
+   This allows you to change `*cwd*` with `set!`."
   [& body]
   `(binding [*cwd* *cwd*]
      ~@body))
 
 (defn chdir
-  "set!s the value of *cwd* to path. Only works inside of
-   with-mutable-cwd"
+  "set!s the value of `*cwd*` to `path`. Only works inside of
+   [[with-mutable-cwd]]"
   [path]
   (set! *cwd* (file path)))

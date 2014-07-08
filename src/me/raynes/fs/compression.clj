@@ -9,7 +9,7 @@
                                                     xz.XZCompressorInputStream)))
 
 (defn unzip
-  "Takes the path to a zipfile source and unzips it to target-dir."
+  "Takes the path to a zipfile `source` and unzips it to target-dir."
   ([source]
      (unzip source (name source)))
   ([source target-dir]
@@ -36,7 +36,9 @@
 
 (defn make-zip-stream
   "Create zip file(s) stream. You must provide a vector of the
-  following form: [[filename1 content1][filename2 content2]...].
+  following form: 
+
+  ```[[filename1 content1][filename2 content2]...]```.
 
   You can provide either strings or byte-arrays as content.
 
@@ -54,7 +56,9 @@
 
 (defn zip
   "Create zip file(s) on the fly. You must provide a vector of the
-  following form: [[filename1 content1][filename2 content2]...].
+  following form: 
+
+  ```[[filename1 content1][filename2 content2]...]```.
 
   You can provide either strings or byte-arrays as content."
   [filename & filename-content-pairs]
@@ -68,7 +72,7 @@
     (cons entry (lazy-seq (tar-entries tin)))))
 
 (defn untar
-  "Takes a tarfile source and untars it to target."
+  "Takes a tarfile `source` and untars it to `target`."
   ([source] (untar source (name source)))
   ([source target]
      (with-open [tin (TarArchiveInputStream. (io/input-stream (fs/file source)))]
@@ -78,21 +82,21 @@
          (io/copy tin output-file)))))
 
 (defn gunzip
-  "Takes a path to a gzip file source and unzips it."
+  "Takes a path to a gzip file `source` and unzips it."
   ([source] (gunzip source (name source)))
   ([source target]
      (io/copy (-> source fs/file io/input-stream GZIPInputStream.)
               (fs/file target))))
 
 (defn bunzip2
-  "Takes a path to a bzip2 file source and uncompresses it."
+  "Takes a path to a bzip2 file `source` and uncompresses it."
   ([source] (bunzip2 source (name source)))
   ([source target]
      (io/copy (-> source fs/file io/input-stream BZip2CompressorInputStream.)
               (fs/file target))))
 
 (defn unxz
-  "Takes a path to a xz file source and uncompresses it."
+  "Takes a path to a xz file `source` and uncompresses it."
   ([source] (unxz source (name source)))
   ([source target]
     (io/copy (-> source fs/file io/input-stream XZCompressorInputStream.)
