@@ -6,6 +6,8 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.apache.commons/commons-compress "1.8"]]
   :plugins [[lein-midje "3.1.3"]
-            [codox "0.6.7"]]
+            [codox "0.8.10"]]
+  :codox {:src-dir-uri "https://github.com/Raynes/fs/blob/master/"
+          :src-linenum-anchor-prefix "L"}
   :deploy-repositories {"releases" :clojars}
   :profiles {:dev {:dependencies [[midje "1.6.3"]]}})
