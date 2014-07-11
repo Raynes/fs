@@ -212,7 +212,12 @@
         (when (apply directory? root link-options)
           (doseq [path (.listFiles (file root))]
             (apply delete-dir path link-options)))
-        (delete root)))))
+        (delete root))
+
+      (defn content-type
+        "Return the content type of `path`."
+        [path]
+        (Files/probeContentType (as-path path))))))
 
 (include-java-7-fns)
 
