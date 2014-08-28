@@ -333,7 +333,7 @@
     (absolute? "foo/") => false))
 
 (defmacro run-java-7-tests []
-  (when (try (import '[java.nio.file Files Path LinkOption]
+  (when (try (import '[java.nio.file Files Path LinkOption StandardCopyOption FileAlreadyExistsException]
                      '[java.nio.file.attribute FileAttribute])
              (catch Exception _ nil))
     '(do
@@ -382,6 +382,23 @@
           (delete-dir soft-b)
           (exists? (io/file root "b" "3")) => false
           (delete-dir root)
-          (exists? root) => false)))))
+          (exists? root) => false))
+
+       (fact "`move` moves files"
+             (let [source (io/file test-files-path "foo")
+                   target (io/file test-files-path "foo.moved")
+                   existing-target (io/file test-files-path "bar")]
+               (move source target)
+               (exists? target) => true
+               (exists? source) => false
+               (move target source)
+               (exists? target) => false
+               (exists? source) => true
+               (move source existing-target) => (throws FileAlreadyExistsException)
+               (copy source target)
+               (move source target StandardCopyOption/REPLACE_EXISTING)
+               (exists? target) => true
+               (exists? source) => false
+               (move target source))))))
 
 (run-java-7-tests)

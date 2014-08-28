@@ -154,7 +154,7 @@
   (delete root))
 
 (defmacro ^:private include-java-7-fns []
-  (when (try (import '[java.nio.file Files Path LinkOption]
+  (when (try (import '[java.nio.file Files Path LinkOption CopyOption]
                      '[java.nio.file.attribute FileAttribute])
              (catch Exception _ nil))
 
@@ -217,7 +217,14 @@
         (when (apply directory? root link-options)
           (doseq [path (.listFiles (file root))]
             (apply delete-dir path link-options)))
-        (delete root)))))
+        (delete root))
+
+      (defn move
+        "Move or rename a file to a target file. Requires Java version 7 or greater. Optional
+         [copy-options](http://docs.oracle.com/javase/7/docs/api/java/nio/file/CopyOption.html)
+         may be provided."
+        [source target & copy-options]
+        (Files/move (as-path source) (as-path target) (into-array CopyOption copy-options))))))
 
 (include-java-7-fns)
 
