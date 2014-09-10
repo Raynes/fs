@@ -33,6 +33,9 @@
     (expand-home (str "~" name)) => (file user)
     (expand-home (format "~%s/foo" name)) => (file user "foo")))
 
+(fact "Expand plain path just returns path"
+      (expand-home (str "melon" File/separator "peach")) => (io/file "melon" "peach"))
+
 (fact (list-dir ".") => (has every? #(instance? File %)))
 
 ;; Want to change these files to be tempfiles at some point.
