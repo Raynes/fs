@@ -38,7 +38,7 @@ definition to your `pom.xml`:
 
 With Leiningen:
 
-    [me.raynes/fs "1.4.4"]
+    [me.raynes/fs "1.4.6"]
 
 
 With Maven:
@@ -46,7 +46,7 @@ With Maven:
     <dependency>
       <groupId>me.raynes</groupId>
       <artifactId>fs</artifactId>
-      <version>1.4.4</version>
+      <version>1.4.6</version>
     </dependency>
 
 ## License
