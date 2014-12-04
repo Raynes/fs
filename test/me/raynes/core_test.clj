@@ -382,6 +382,16 @@
           (delete-dir soft-b)
           (exists? (io/file root "b" "3")) => false
           (delete-dir root)
-          (exists? root) => false)))))
+          (exists? root) => false))
+
+       (fact "Content type"
+        (let [tar (io/file test-files-path "ggg.tar")
+              zip (io/file test-files-path "ggg.zip")
+              xz (io/file test-files-path "xxx.xz")
+              txt (io/file test-files-path "foo.txt")]
+          (content-type tar) => "application/x-tar"
+          (content-type zip) => "application/zip"
+          (content-type xz) => "application/x-xz"
+          (content-type txt) => "text/plain")))))
 
 (run-java-7-tests)

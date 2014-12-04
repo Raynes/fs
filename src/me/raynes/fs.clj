@@ -217,7 +217,14 @@
         (when (apply directory? root link-options)
           (doseq [path (.listFiles (file root))]
             (apply delete-dir path link-options)))
-        (delete root)))))
+        (delete root))
+
+      (defn content-type
+        "Return the content type of `path`. See the
+        [javadocs](http://docs.oracle.com/javase/7/docs/api/java/nio/file/Files.html#probeContentType%28java.nio.file.Path%29)
+        for more information.  Requires Java version 7 or greater."
+        [path]
+        (Files/probeContentType (as-path path))))))
 
 (include-java-7-fns)
 
