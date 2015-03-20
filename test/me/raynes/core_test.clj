@@ -275,17 +275,26 @@
     (delete-dir "zggg"))
 
   (fact (zip "fro.zip" ["bbb.txt" "bbb"])
-        (exists? "fro.zip") => true
-        (unzip "fro.zip" "fro")
-        (exists? "fro/bbb.txt") => true
-        (delete "fro.zip")
-        (delete-dir "fro"))
+    (exists? "fro.zip") => true
+    (unzip "fro.zip" "fro")
+    (exists? "fro/bbb.txt") => true
+    (delete "fro.zip")
+    (delete-dir "fro"))
 
   (fact "about zip round trip"
     (zip "round.zip" ["some.txt" "some text"])
     (unzip "round.zip" "round")
     (slurp (file "round/some.txt")) => "some text")
 
+  (fact "zip-files"
+    (zip-files "foobar.zip" "foo" "bar")
+    (exists? "foobar.zip")
+    (unzip "foobar.zip" "foobar")
+    (exists? "foobar/foo") => true
+    (exists? "foobar/bar") => true
+    (delete "foobar.zip")
+    (delete-dir "foobar"))
+  
   (fact
     (untar "ggg.tar" "zggg")
     (exists? "zggg/ggg") => true
