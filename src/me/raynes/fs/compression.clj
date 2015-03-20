@@ -6,7 +6,8 @@
            (org.apache.commons.compress.archivers.tar TarArchiveInputStream
                                                       TarArchiveEntry)
            (org.apache.commons.compress.compressors bzip2.BZip2CompressorInputStream
-                                                    xz.XZCompressorInputStream)))
+                                                    xz.XZCompressorInputStream)
+           (java.io ByteArrayOutputStream)))
 
 (defn unzip
   "Takes the path to a zipfile `source` and unzips it to target-dir."
@@ -66,7 +67,7 @@
            (fs/file filename)))
 
 (defn- slurp-bytes [fpath]
-  (with-open [data (io/input-stream fpath)]
+  (with-open [data (io/input-stream (fs/file fpath))]
     (with-open [out (ByteArrayOutputStream.)]
       (io/copy data out)
       (.toByteArray out))))
@@ -81,7 +82,7 @@
   ```([fpath1-basename fpath1-content] [fpath2-basename fpath2-content]...)``"
   [filename & fpaths]
   (let [filename-content-pairs (map (juxt fs/base-name slurp-bytes) fpaths)]
-    (fsc/zip filename filename-content-pairs)))
+    (zip filename filename-content-pairs)))
 
 (defn- tar-entries
   "Get a lazy-seq of entries in a tarfile."
