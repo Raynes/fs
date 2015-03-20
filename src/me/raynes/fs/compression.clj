@@ -65,6 +65,24 @@
   (io/copy (make-zip-stream filename-content-pairs)
            (fs/file filename)))
 
+(defn- slurp-bytes [fpath]
+  (with-open [data (io/input-stream fpath)]
+    (with-open [out (ByteArrayOutputStream.)]
+      (io/copy data out)
+      (.toByteArray out))))
+
+(defn zip-files
+  "Zip files provided in argument vector to a single zip. Converts the argument list:
+
+  ```(fpath1 fpath2...)```
+
+  into filename-content -pairs, using the original file's basename as the filename in zip`and slurping the content:
+
+  ```([fpath1-basename fpath1-content] [fpath2-basename fpath2-content]...)``"
+  [filename & fpaths]
+  (let [filename-content-pairs (map (juxt fs/base-name slurp-bytes) fpaths)]
+    (fsc/zip filename filename-content-pairs)))
+
 (defn- tar-entries
   "Get a lazy-seq of entries in a tarfile."
   [^TarArchiveInputStream tin]
