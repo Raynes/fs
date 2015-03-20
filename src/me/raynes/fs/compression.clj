@@ -45,14 +45,15 @@
 
   The piped streams are used to create content on the fly, which means
   this can be used to make compressed files without even writing them
-  to disk." [& filename-content-pairs]
+  to disk."
+  [& filename-content-pairs]
   (let [file
-        (let [pipe-in (java.io.PipedInputStream.)
-              pipe-out (java.io.PipedOutputStream. pipe-in)]
-          (future
-            (with-open [zip (java.util.zip.ZipOutputStream. pipe-out)]
-              (add-zip-entry zip (flatten filename-content-pairs))))
-          pipe-in)]
+    (let [pipe-in (java.io.PipedInputStream.)
+          pipe-out (java.io.PipedOutputStream. pipe-in)]
+      (future
+        (with-open [zip (java.util.zip.ZipOutputStream. pipe-out)]
+          (add-zip-entry zip (flatten filename-content-pairs))))
+      pipe-in)]
     (io/input-stream file)))
 
 (defn zip
@@ -72,6 +73,13 @@
       (io/copy data out)
       (.toByteArray out))))
 
+(defn make-zip-stream-from-files
+  "Like make-zip-stream but takes a sequential of file paths and builds filename-content-pairs
+   based on those"
+  [fpaths]
+  (let [filename-content-pairs (map (juxt fs/base-name slurp-bytes) fpaths)]
+    (make-zip-stream filename-content-pairs)))
+
 (defn zip-files
   "Zip files provided in argument vector to a single zip. Converts the argument list:
 
@@ -80,9 +88,9 @@
   into filename-content -pairs, using the original file's basename as the filename in zip`and slurping the content:
 
   ```([fpath1-basename fpath1-content] [fpath2-basename fpath2-content]...)``"
-  [filename & fpaths]
-  (let [filename-content-pairs (map (juxt fs/base-name slurp-bytes) fpaths)]
-    (zip filename filename-content-pairs)))
+  [filename fpaths]
+  (io/copy (make-zip-stream-from-files fpaths)
+           (fs/file filename)))
 
 (defn- tar-entries
   "Get a lazy-seq of entries in a tarfile."
