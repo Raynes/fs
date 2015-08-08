@@ -24,25 +24,23 @@
              home directory"}
   invalid-username-regexp #"[^A-Za-z0-9\-\._]+")
 
-(let [homedir (io/file (System/getProperty "user.home"))
-      usersdir (.getParent homedir)]
-  (defn home
-    "With no arguments, returns the current value of the `user.home`
+(defn home
+  "With no arguments, returns the current value of the `user.home`
   system property. If a `user` is passed, returns that user's home
   directory.  If user is not present on the system, returns nil. If
   shell call fails (it will on windows), returns nil."
-    ([] (-> "user.home" System/getProperty io/file))
-    ([username]
-     (when-not
-         (re-find invalid-username-regexp username)
-       (let [{:keys [out exit]}
-             (->> username
-                  (str "echo ~")
-                  (sh/sh "sh" "-c"))]
-         (when (and
-                (zero? exit)
-                (not= "~" (subs out 0 1)))
-           (-> out string/trim io/file)))))))
+  ([] (-> "user.home" System/getProperty io/file))
+  ([username]
+   (when-not
+       (re-find invalid-username-regexp username)
+     (let [{:keys [out exit]}
+           (->> username
+                (str "echo ~")
+                (sh/sh "sh" "-c"))]
+       (when (and
+              (zero? exit)
+              (not= "~" (subs out 0 1)))
+         (-> out string/trim io/file))))))
 
 (defn expand-home
   "If `path` begins with a tilde (`~`), expand the tilde to the value
