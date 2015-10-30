@@ -192,6 +192,20 @@
     (delete f)))
 
 (fact
+  (let [f (temp-file "fs-")]
+    (chmod "777" f)
+    (executable? f) => true
+    (readable? f) => true
+    (writeable? f) => true
+    (chmod "000" f)
+    (when-not (re-find #"Windows" (System/getProperty "os.name"))
+      (chmod "-x" f)
+      (executable? f) => false
+      (readable? f) => false
+      (writeable? f) => false)
+    (delete f)))
+
+(fact
   (let [from (create-walk-dir)
         to (temp-dir "fs-")
         path (copy-dir from to)

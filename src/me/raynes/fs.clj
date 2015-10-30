@@ -418,13 +418,41 @@
       (.setLastModified f (or time (System/currentTimeMillis))))
     f))
 
+(defn- char-to-int
+  [c]
+  (- (int c) 48))
+
+(defn- chmod-octal-digit
+  [f i user?]
+  (if (> i 7)
+    (throw (IllegalArgumentException. "Bad mode"))
+    (do (.setReadable f (pos? (bit-and i 4)) user?)
+        (.setWritable f (pos? (bit-and i 2)) user?)
+        (.setExecutable f (pos? (bit-and i 1)) user?))))
+
+(defn- chmod-octal
+  [mode path]
+  (let [[user group world] (map char-to-int mode)
+        f (file path)]
+    (if (not= group world)
+      (throw (IllegalArgumentException.
+              "Bad mode. Group permissions must be equal to world permissions"))
+      (do (chmod-octal-digit f world false)
+          (chmod-octal-digit f user true)
+          path))))
+
 (defn chmod
   "Change file permissions. Returns path.
 
-  `mode` can be any combination of `r` (readable) `w` (writable) and
+  `mode` can be a permissions string in octal or symbolic format.
+  Symbolic: any combination of `r` (readable) `w` (writable) and
   `x` (executable). It should be prefixed with `+` to set or `-` to
   unset. And optional prefix of `u` causes the permissions to be set
   for the owner only.
+  Octal: a string of three octal digits representing user, group, and
+  world permissions. The three bits of each digit signify read, write,
+  and execute permissions (in order of significance). Note that group
+  and world permissions must be equal.
 
   Examples:
 
@@ -434,16 +462,18 @@
   ```"
   [mode path]
   (assert-exists path)
-  (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
-    (when (nil? op) (throw (IllegalArgumentException. "Bad mode")))
-    (let [perm-set (set permissions)
-          f (file path)
-          flag (= op "+")
-          user (not (empty? u))]
-      (when (perm-set \r) (.setReadable f flag user))
-      (when (perm-set \w) (.setWritable f flag user))
-      (when (perm-set \x) (.setExecutable f flag user)))
-    path))
+  (if (re-matches #"^\d{3}$" mode)
+    (chmod-octal mode path)
+    (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
+      (when (nil? op) (throw (IllegalArgumentException. "Bad mode")))
+      (let [perm-set (set permissions)
+            f (file path)
+            flag (= op "+")
+            user (not (empty? u))]
+        (when (perm-set \r) (.setReadable f flag user))
+        (when (perm-set \w) (.setWritable f flag user))
+        (when (perm-set \x) (.setExecutable f flag user)))
+      path)))
 
 (defn copy+
   "Copy `src` to `dest`, create directories if needed."
