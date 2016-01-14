@@ -314,13 +314,12 @@
 
 (defn- temp-create
   "Create a temporary file or dir, trying n times before giving up."
-  ([prefix suffix tries f]
-   (loop [tries tries]
-     (let [tmp (file (tmpdir) (temp-name prefix suffix))]
-       (when (pos? tries)
-         (if (f tmp)
-           tmp
-           (recur (dec tries))))))))
+  [prefix suffix tries f]
+  (let [tmp (file (tmpdir) (temp-name prefix suffix))]
+    (when (pos? tries)
+      (if (f tmp)
+        tmp
+        (recur prefix suffix (dec tries) f)))))
 
 (defn temp-file
   "Create a temporary file. Returns nil if file could not be created
