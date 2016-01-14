@@ -79,7 +79,11 @@
        (doseq [^TarArchiveEntry entry (tar-entries tin) :when (not (.isDirectory entry))
                :let [output-file (fs/file target (.getName entry))]]
          (fs/mkdirs (fs/parent output-file))
-         (io/copy tin output-file)))))
+         (io/copy tin output-file)
+         (when (.isFile entry)
+           (fs/chmod (apply str (take-last
+                                 3 (format "%05o" (.getMode entry))))
+                     (.getPath output-file)))))))
 
 (defn gunzip
   "Takes a path to a gzip file `source` and unzips it."
