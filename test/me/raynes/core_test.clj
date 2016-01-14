@@ -9,6 +9,8 @@
 
 (def system-tempdir (System/getProperty "java.io.tmpdir"))
 
+(def fs-supports-symlinks? (not (.startsWith (System/getProperty "os.name") "Windows")))
+
 (defn create-walk-dir []
   (let [root (temp-dir "fs-")]
     (mkdir (file root "a"))
@@ -370,32 +372,36 @@
 
        (fact
         (let [target (io/file test-files-path "ggg.tar")
-              hard (link (io/file test-files-path "hard.link") target)
-              soft (sym-link (io/file test-files-path "soft.link") target)]
+              hard (link (io/file test-files-path "hard.link") target)]
           (file? hard) => true
-          (file? soft) => true
-          (link? soft) => true
-          (= (read-sym-link soft) target)
-          (delete hard)
-          (delete soft)))
+          (delete hard)))
 
-       (fact
-        (let [soft (sym-link (io/file test-files-path "soft.link") test-files-path)]
-          (link? soft) => true
-          (file? soft) => false
-          (directory? soft) => true
-          (directory? soft LinkOption/NOFOLLOW_LINKS) => false
-          (delete soft)))
+       (when fs-supports-symlinks?
+         (fact
+          (let [target (io/file test-files-path "ggg.tar")
+                soft (sym-link (io/file test-files-path "soft.link") target)]
+            (file? soft) => true
+            (link? soft) => true
+            (= (read-sym-link soft) target)
+            (delete soft)))          
+          
+         (fact
+          (let [soft (sym-link (io/file test-files-path "soft.link") test-files-path)]
+            (link? soft) => true
+            (file? soft) => false
+            (directory? soft) => true
+            (directory? soft LinkOption/NOFOLLOW_LINKS) => false
+            (delete soft)))
 
-       (fact
-        (let [root (create-walk-dir)
-              soft-a (sym-link (io/file root "soft-a.link") (io/file root "a"))
-              soft-b (sym-link (io/file root "soft-b.link") (io/file root "b"))]
-          (delete-dir soft-a LinkOption/NOFOLLOW_LINKS)
-          (exists? (io/file root "a" "2")) => true
-          (delete-dir soft-b)
-          (exists? (io/file root "b" "3")) => false
-          (delete-dir root)
-          (exists? root) => false)))))
+         (fact
+          (let [root (create-walk-dir)
+                soft-a (sym-link (io/file root "soft-a.link") (io/file root "a"))
+                soft-b (sym-link (io/file root "soft-b.link") (io/file root "b"))]
+            (delete-dir soft-a LinkOption/NOFOLLOW_LINKS)
+            (exists? (io/file root "a" "2")) => true
+            (delete-dir soft-b)
+            (exists? (io/file root "b" "3")) => false
+            (delete-dir root)
+            (exists? root) => false))))))
 
 (run-java-7-tests)
