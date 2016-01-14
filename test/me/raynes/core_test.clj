@@ -35,6 +35,10 @@
     (expand-home (str "~" name)) => (file user)
     (expand-home (format "~%s/foo" name)) => (file user "foo")))
 
+(fact "Expand a path w/o tilde just returns path"
+      (let [user (System/getProperty "user.home")]
+        (expand-home (str user File/separator "foo")) => (io/file user "foo")))
+
 (fact (list-dir ".") => (has every? #(instance? File %)))
 
 ;; Want to change these files to be tempfiles at some point.
