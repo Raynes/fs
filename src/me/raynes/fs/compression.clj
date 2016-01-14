@@ -13,13 +13,13 @@
   ([source]
      (unzip source (name source)))
   ([source target-dir]
-     (let [zip (ZipFile. (fs/file source))
-           entries (enumeration-seq (.entries zip))
-           target-file #(fs/file target-dir (str %))]
-       (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
-               :let [f (target-file entry)]]
-         (fs/mkdirs (fs/parent f))
-         (io/copy (.getInputStream zip entry) f)))
+     (with-open [zip (ZipFile. (fs/file source))]
+       (let [entries (enumeration-seq (.entries zip))
+             target-file #(fs/file target-dir (str %))]
+         (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
+                 :let [f (target-file entry)]]
+           (fs/mkdirs (fs/parent f))
+           (io/copy (.getInputStream zip entry) f))))
      target-dir))
 
 (defn- add-zip-entry

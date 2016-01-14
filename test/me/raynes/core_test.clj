@@ -294,7 +294,8 @@
         (exists? "fro.zip") => true
         (unzip "fro.zip" "fro")
         (exists? "fro/bbb.txt") => true
-        (delete "fro.zip")
+        (rename "fro.zip" "fro2.zip") => true
+        (delete "fro2.zip")
         (delete-dir "fro"))
 
   (fact "about zip round trip"
