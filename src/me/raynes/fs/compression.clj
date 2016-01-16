@@ -14,13 +14,13 @@
   ([source]
      (unzip source (name source)))
   ([source target-dir]
-     (let [zip (ZipFile. (fs/file source))
-           entries (enumeration-seq (.entries zip))
-           target-file #(fs/file target-dir (str %))]
-       (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
-               :let [f (target-file entry)]]
-         (fs/mkdirs (fs/parent f))
-         (io/copy (.getInputStream zip entry) f)))
+     (with-open [zip (ZipFile. (fs/file source))]
+       (let [entries (enumeration-seq (.entries zip))
+             target-file #(fs/file target-dir (str %))]
+         (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
+                 :let [f (target-file entry)]]
+           (fs/mkdirs (fs/parent f))
+           (io/copy (.getInputStream zip entry) f))))
      target-dir))
 
 (defn- add-zip-entry
@@ -106,7 +106,11 @@
        (doseq [^TarArchiveEntry entry (tar-entries tin) :when (not (.isDirectory entry))
                :let [output-file (fs/file target (.getName entry))]]
          (fs/mkdirs (fs/parent output-file))
-         (io/copy tin output-file)))))
+         (io/copy tin output-file)
+         (when (.isFile entry)
+           (fs/chmod (apply str (take-last
+                                 3 (format "%05o" (.getMode entry))))
+                     (.getPath output-file)))))))
 
 (defn gunzip
   "Takes a path to a gzip file `source` and unzips it."

@@ -9,6 +9,8 @@
 
 (def system-tempdir (System/getProperty "java.io.tmpdir"))
 
+(def fs-supports-symlinks? (not (.startsWith (System/getProperty "os.name") "Windows")))
+
 (defn create-walk-dir []
   (let [root (temp-dir "fs-")]
     (mkdir (file root "a"))
@@ -32,6 +34,10 @@
         name (System/getProperty "user.name")]
     (expand-home (str "~" name)) => (file user)
     (expand-home (format "~%s/foo" name)) => (file user "foo")))
+
+(fact "Expand a path w/o tilde just returns path"
+      (let [user (System/getProperty "user.home")]
+        (expand-home (str user File/separator "foo")) => (io/file user "foo")))
 
 (fact (list-dir ".") => (has every? #(instance? File %)))
 
@@ -192,6 +198,20 @@
     (delete f)))
 
 (fact
+  (let [f (temp-file "fs-")]
+    (chmod "777" f)
+    (executable? f) => true
+    (readable? f) => true
+    (writeable? f) => true
+    (chmod "000" f)
+    (when-not (re-find #"Windows" (System/getProperty "os.name"))
+      (chmod "-x" f)
+      (executable? f) => false
+      (readable? f) => false
+      (writeable? f) => false)
+    (delete f)))
+
+(fact
   (let [from (create-walk-dir)
         to (temp-dir "fs-")
         path (copy-dir from to)
@@ -278,7 +298,8 @@
     (exists? "fro.zip") => true
     (unzip "fro.zip" "fro")
     (exists? "fro/bbb.txt") => true
-    (delete "fro.zip")
+    (rename "fro.zip" "fro2.zip") => true
+    (delete "fro2.zip")
     (delete-dir "fro"))
 
   (fact "about zip round trip"
@@ -342,7 +363,7 @@
     (absolute? "foo/") => false))
 
 (defmacro run-java-7-tests []
-  (when (try (import '[java.nio.file Files Path LinkOption]
+  (when (try (import '[java.nio.file Files Path LinkOption StandardCopyOption FileAlreadyExistsException]
                      '[java.nio.file.attribute FileAttribute])
              (catch Exception _ nil))
     '(do
@@ -365,32 +386,53 @@
 
        (fact
         (let [target (io/file test-files-path "ggg.tar")
-              hard (link (io/file test-files-path "hard.link") target)
-              soft (sym-link (io/file test-files-path "soft.link") target)]
+              hard (link (io/file test-files-path "hard.link") target)]
           (file? hard) => true
-          (file? soft) => true
-          (link? soft) => true
-          (= (read-sym-link soft) target)
-          (delete hard)
-          (delete soft)))
+          (delete hard)))
 
-       (fact
-        (let [soft (sym-link (io/file test-files-path "soft.link") test-files-path)]
-          (link? soft) => true
-          (file? soft) => false
-          (directory? soft) => true
-          (directory? soft LinkOption/NOFOLLOW_LINKS) => false
-          (delete soft)))
+       (when fs-supports-symlinks?
+         (fact
+          (let [target (io/file test-files-path "ggg.tar")
+                soft (sym-link (io/file test-files-path "soft.link") target)]
+            (file? soft) => true
+            (link? soft) => true
+            (= (read-sym-link soft) target)
+            (delete soft)))
 
-       (fact
-        (let [root (create-walk-dir)
-              soft-a (sym-link (io/file root "soft-a.link") (io/file root "a"))
-              soft-b (sym-link (io/file root "soft-b.link") (io/file root "b"))]
-          (delete-dir soft-a LinkOption/NOFOLLOW_LINKS)
-          (exists? (io/file root "a" "2")) => true
-          (delete-dir soft-b)
-          (exists? (io/file root "b" "3")) => false
-          (delete-dir root)
-          (exists? root) => false)))))
+         (fact
+          (let [soft (sym-link (io/file test-files-path "soft.link") test-files-path)]
+            (link? soft) => true
+            (file? soft) => false
+            (directory? soft) => true
+            (directory? soft LinkOption/NOFOLLOW_LINKS) => false
+            (delete soft)))
+
+         (fact
+          (let [root (create-walk-dir)
+                soft-a (sym-link (io/file root "soft-a.link") (io/file root "a"))
+                soft-b (sym-link (io/file root "soft-b.link") (io/file root "b"))]
+            (delete-dir soft-a LinkOption/NOFOLLOW_LINKS)
+            (exists? (io/file root "a" "2")) => true
+            (delete-dir soft-b)
+            (exists? (io/file root "b" "3")) => false
+            (delete-dir root)
+            (exists? root) => false)))
+
+         (fact "`move` moves files"
+                 (let [source (io/file test-files-path "foo")
+                     target (io/file test-files-path "foo.moved")
+                     existing-target (io/file test-files-path "bar")]
+                 (move source target)
+                 (exists? target) => true
+                 (exists? source) => false
+                 (move target source)
+                 (exists? target) => false
+                 (exists? source) => true
+                 (move source existing-target) => (throws FileAlreadyExistsException)
+                 (copy source target)
+                 (move source target StandardCopyOption/REPLACE_EXISTING)
+                 (exists? target) => true
+                 (exists? source) => false
+                 (move target source))))))
 
 (run-java-7-tests)

@@ -44,7 +44,7 @@
         (if (neg? sep)
           (home (subs path 1))
           (io/file (home (subs path 1 sep)) (subs path (inc sep)))))
-      path)))
+      (io/file path))))
 
 ;; Library functions will call this function on paths/files so that
 ;; we get the cwd effect on them.
@@ -154,7 +154,7 @@
   (delete root))
 
 (defmacro ^:private include-java-7-fns []
-  (when (try (import '[java.nio.file Files Path LinkOption]
+  (when (try (import '[java.nio.file Files Path LinkOption CopyOption]
                      '[java.nio.file.attribute FileAttribute])
              (catch Exception _ nil))
 
@@ -177,10 +177,12 @@
         (Files/isSymbolicLink (as-path path)))
 
       (defn ^File link
-        "Create a \"hard\" link from `path` to `target`.
-       Requires Java version 7 or greater."
-        [path target]
-        (file (Files/createLink (as-path path) (as-path target))))
+        "Create a \"hard\" link from path to target.
+       Requires Java version 7 or greater.  The arguments
+       are in the opposite order from the link(2) system
+       call."
+        [new-file existing-file]
+        (file (Files/createLink (as-path new-file) (as-path existing-file))))
 
       (defn ^File sym-link
         "Create a \"soft\" link from `path` to `target`.
@@ -217,7 +219,14 @@
         (when (apply directory? root link-options)
           (doseq [path (.listFiles (file root))]
             (apply delete-dir path link-options)))
-        (delete root)))))
+        (delete root))
+
+      (defn move
+        "Move or rename a file to a target file. Requires Java version 7 or greater. Optional
+         [copy-options](http://docs.oracle.com/javase/7/docs/api/java/nio/file/CopyOption.html)
+         may be provided."
+        [source target & copy-options]
+        (Files/move (as-path source) (as-path target) (into-array CopyOption copy-options))))))
 
 (include-java-7-fns)
 
@@ -314,13 +323,12 @@
 
 (defn- temp-create
   "Create a temporary file or dir, trying n times before giving up."
-  ([prefix suffix tries f]
-   (loop [tries tries]
-     (let [tmp (file (tmpdir) (temp-name prefix suffix))]
-       (when (pos? tries)
-         (if (f tmp)
-           tmp
-           (recur (dec tries))))))))
+  [prefix suffix tries f]
+  (let [tmp (file (tmpdir) (temp-name prefix suffix))]
+    (when (pos? tries)
+      (if (f tmp)
+        tmp
+        (recur prefix suffix (dec tries) f)))))
 
 (defn temp-file
   "Create a temporary file. Returns nil if file could not be created
@@ -418,13 +426,41 @@
       (.setLastModified f (or time (System/currentTimeMillis))))
     f))
 
+(defn- char-to-int
+  [c]
+  (- (int c) 48))
+
+(defn- chmod-octal-digit
+  [f i user?]
+  (if (> i 7)
+    (throw (IllegalArgumentException. "Bad mode"))
+    (do (.setReadable f (pos? (bit-and i 4)) user?)
+        (.setWritable f (pos? (bit-and i 2)) user?)
+        (.setExecutable f (pos? (bit-and i 1)) user?))))
+
+(defn- chmod-octal
+  [mode path]
+  (let [[user group world] (map char-to-int mode)
+        f (file path)]
+    (if (not= group world)
+      (throw (IllegalArgumentException.
+              "Bad mode. Group permissions must be equal to world permissions"))
+      (do (chmod-octal-digit f world false)
+          (chmod-octal-digit f user true)
+          path))))
+
 (defn chmod
   "Change file permissions. Returns path.
 
-  `mode` can be any combination of `r` (readable) `w` (writable) and
+  `mode` can be a permissions string in octal or symbolic format.
+  Symbolic: any combination of `r` (readable) `w` (writable) and
   `x` (executable). It should be prefixed with `+` to set or `-` to
   unset. And optional prefix of `u` causes the permissions to be set
   for the owner only.
+  Octal: a string of three octal digits representing user, group, and
+  world permissions. The three bits of each digit signify read, write,
+  and execute permissions (in order of significance). Note that group
+  and world permissions must be equal.
 
   Examples:
 
@@ -434,16 +470,18 @@
   ```"
   [mode path]
   (assert-exists path)
-  (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
-    (when (nil? op) (throw (IllegalArgumentException. "Bad mode")))
-    (let [perm-set (set permissions)
-          f (file path)
-          flag (= op "+")
-          user (not (empty? u))]
-      (when (perm-set \r) (.setReadable f flag user))
-      (when (perm-set \w) (.setWritable f flag user))
-      (when (perm-set \x) (.setExecutable f flag user)))
-    path))
+  (if (re-matches #"^\d{3}$" mode)
+    (chmod-octal mode path)
+    (let [[_ u op permissions] (re-find #"^(u?)([+-])([rwx]{1,3})$" mode)]
+      (when (nil? op) (throw (IllegalArgumentException. "Bad mode")))
+      (let [perm-set (set permissions)
+            f (file path)
+            flag (= op "+")
+            user (not (empty? u))]
+        (when (perm-set \r) (.setReadable f flag user))
+        (when (perm-set \w) (.setWritable f flag user))
+        (when (perm-set \x) (.setExecutable f flag user)))
+      path)))
 
 (defn copy+
   "Copy `src` to `dest`, create directories if needed."
