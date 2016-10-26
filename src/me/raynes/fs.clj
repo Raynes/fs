@@ -344,6 +344,24 @@
   ([prefix suffix]       (temp-dir prefix suffix 10))
   ([prefix suffix tries] (temp-create prefix suffix tries mkdirs)))
 
+(defn ephemeral-file
+  "Create an ephemeral file (will be deleted on JVM exit).
+   Returns nil if file could not be created even after n tries
+  (default 10)."
+  ([prefix]              (ephemeral-file prefix "" 10))
+  ([prefix suffix]       (ephemeral-file prefix suffix 10))
+  ([prefix suffix tries] (when-let [created (temp-create prefix suffix tries create)]
+                           (doto created .deleteOnExit))))
+
+(defn ephemeral-dir
+  "Create an ephemeral directory (will be deleted on JVM exit).
+   Returns nil if dir could not be created even after n tries
+  (default 10)."
+  ([prefix]              (ephemeral-dir prefix "" 10))
+  ([prefix suffix]       (ephemeral-dir prefix suffix 10))
+  ([prefix suffix tries] (when-let [created (temp-create prefix suffix tries mkdirs)]
+                           (doto created .deleteOnExit))))
+
 ; Taken from https://github.com/jkk/clj-glob. (thanks Justin!)
 (defn- glob->regex
   "Takes a glob-format string and returns a regex."
