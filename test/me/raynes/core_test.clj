@@ -98,6 +98,16 @@
     (delete tmp)))
 
 (fact
+ (let [tmp (ephemeral-file "fs-")]
+   (exists? tmp) => true
+   (file? tmp) => true)) ;; is deleted on JVM exit
+
+(fact
+ (let [tmp (ephemeral-dir "fs-")]
+   (exists? tmp) => true
+   (directory? tmp) => true)) ;; is deleted on JVM exit
+
+(fact
   (absolute "foo") => (io/file *cwd* "foo"))
 
 (fact
