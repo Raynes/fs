@@ -38,7 +38,7 @@
   name as the user relative to the parent of the current value of
   `user.home`."
   [path]
-  (let [path (str path)]
+  (let [path (str (io/as-file path))]
     (if (.startsWith path "~")
       (let [sep (.indexOf path File/separator)]
         (if (neg? sep)
