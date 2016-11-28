@@ -120,6 +120,12 @@
   (base-name "foo/bar.txt" ".png") => "bar.txt")
 
 (fact
+  (join "foo") => (str *cwd* "/foo")
+  (join "/foo" "bar") => "/foo/bar"
+  (join "test" "me" "raynes" "testfiles" "foo") => (str *cwd* "/test/me/raynes/testfiles/foo")
+  (join "path/" "../to" "some//file") => (str *cwd* "/to/some/file"))
+
+(fact
   (let [tmp (temp-file "fs-")]
     (> (mod-time tmp) 0) => true
     (delete tmp)))

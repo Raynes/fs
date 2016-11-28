@@ -130,6 +130,12 @@
                         (if (pos? dot) (subs base 0 dot) base))
              :else base))))
 
+(defn ^String join
+  "Returns the canonical path by joining one or more
+   paths in a system-dependent manner."
+  [path & paths]
+  (.getCanonicalPath (apply file (cons path paths))))
+
 (defn directory?
   "Return true if `path` is a directory."
   [path]
