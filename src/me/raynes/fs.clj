@@ -250,7 +250,7 @@
 (defn parent
   "Return the parent path."
   [path]
-  (.getParentFile (file path)))
+  (.getParent (file path)))
 
 (defn mod-time
   "Return file modification time."
