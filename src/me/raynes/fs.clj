@@ -414,9 +414,8 @@
   (.listFiles f))
 
 (defn- iterate-dir* [path]
-  (let [root (file path)
-        nodes (butlast (iterzip (zip/zipper f-dir? f-children nil root)))]
-    (filter f-dir? nodes)))
+  (let [root (file path)]
+    (filter f-dir? (tree-seq f-dir? f-children root))))
 
 (defn- walk-map-fn [root]
   (let [kids (f-children root)
@@ -425,7 +424,7 @@
     [root dirs files]))
 
 (defn iterate-dir
-  "Return a sequence `[root dirs files]`, starting from `path` in depth-first order"
+  "Return a lazy sequence `[root dirs files]`, starting from `path` in depth-first order"
   [path]
   (map walk-map-fn (iterate-dir* path)))
 
