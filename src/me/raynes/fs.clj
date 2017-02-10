@@ -69,8 +69,8 @@
   (seq (.listFiles (file path))))
 
 (defmacro ^:private predicate [s path]
-  `(if ~path
-     (. ~path ~s)
+  `(if-let [path# ~path]
+     (. path# ~s)
      false))
 
 (defn absolute?
