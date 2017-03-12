@@ -145,6 +145,8 @@
   [path]
   (predicate isHidden (file path)))
 
+(declare delete-dir)
+
 (defn clean-dir
   "Deletes all files within a directory, but not the directory its self."
   [dir]
