@@ -132,6 +132,12 @@
 
 (fact
   (let [root (create-walk-dir)
+        result (clean-dir root)]
+    (exists? root) => true
+    (count (.listFiles root)) => 0))
+
+(fact
+  (let [root (create-walk-dir)
         result (delete-dir root)]
     (exists? root) => false))
 

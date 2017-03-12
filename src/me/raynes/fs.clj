@@ -145,12 +145,17 @@
   [path]
   (predicate isHidden (file path)))
 
+(defn clean-dir
+  "Deletes all files within a directory, but not the directory its self."
+  [dir]
+  (when (directory? dir)
+    (doseq [path (.listFiles (file dir))]
+      (delete-dir path))))
+
 (defn delete-dir
   "Delete a directory tree."
   [root]
-  (when (directory? root)
-    (doseq [path (.listFiles (file root))]
-      (delete-dir path)))
+  (clean-dir root)
   (delete root))
 
 (defmacro ^:private include-java-7-fns []
