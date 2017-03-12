@@ -1,3 +1,5 @@
+# WARNING: This repository is no longer maintained, see [here](https://github.com/funcool/fs) for the current version.
+
 # fs - File system utilities for Clojure
 
 [![Build Status](https://secure.travis-ci.org/Raynes/fs.png)](http://travis-ci.org/Raynes/fs)
