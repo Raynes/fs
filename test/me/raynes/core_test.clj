@@ -372,6 +372,12 @@
     (absolute? "foo/bar") => false
     (absolute? "foo/") => false))
 
+(fact
+    (let [temp-dirs (with-temp-dir [source target]
+                      (every? directory? [source target]) => true
+                      [source target])]
+      (every? (comp not exists?) temp-dirs)))
+
 (defmacro run-java-7-tests []
   (when (try (import '[java.nio.file Files Path LinkOption StandardCopyOption FileAlreadyExistsException]
                      '[java.nio.file.attribute FileAttribute])

@@ -604,3 +604,35 @@
    [[with-mutable-cwd]]"
   [path]
   (set! *cwd* (file path)))
+
+(defmacro with-temp-dir
+  "Execute the `body` after binding a given vector of
+   symbols to temp directory instances.
+   will delete all temp directories after execution.
+
+   Example:
+   ```
+   (with-temp-dir [temp-dir1 temp-dir2]
+     (println temp-dir1)
+     (let [temp-file1 (str temp-dir1 'tuki.txt')
+           temp-file2 (str temp-dir2 'shuki.txt')]
+       (spit temp-file1 'hi')
+       (spit temp-file2 'buddy')
+       [(slurp temp-file1) (slurp temp-file2)]))
+  
+   #<File /var/folders/lp/2tg9rhtj28g0y60n8nt_wq_c0000gp/T/temp-dir11490694621530-86140538>
+   ['hi' 'buddy']
+
+   (directory? '/var/folders/lp/2tg9rhtj28g0y60n8nt_wq_c0000gp/T/temp-dir11490694621530-8614053')
+   false"
+  [dirs & body]
+  (let [bindings (reduce
+                  (fn [acc dir]
+                    (conj acc dir `(temp-dir ~(str dir)))) [] dirs)]
+    `(let ~bindings
+       (try
+         (do ~@body)
+         (finally
+           (reduce (fn [_# x#]
+                     (delete-dir x#)) ~dirs))))))
+
