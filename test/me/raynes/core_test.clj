@@ -345,7 +345,13 @@
   (fact
     (unxz "xxx.xz" "xxx")
     (exists? "xxx") => true
-    (delete "xxx")))
+    (delete "xxx"))
+
+  (fact "zip-slip vulnerability"
+    (unzip "zip-slip.zip" "zip-slip") => (throws Exception "Expanding entry would be created outside target dir")
+    (untar "zip-slip.tar" "zip-slip") => (throws Exception "Expanding entry would be created outside target dir")
+    (exists? "/tmp/evil.txt") => false
+    (delete-dir "zip-slip")))
 
 (let [win-root (when-not unix-root "c:")]
   (fact

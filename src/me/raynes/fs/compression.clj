@@ -7,7 +7,14 @@
                                                       TarArchiveEntry)
            (org.apache.commons.compress.compressors bzip2.BZip2CompressorInputStream
                                                     xz.XZCompressorInputStream)
-           (java.io ByteArrayOutputStream)))
+           (java.io ByteArrayOutputStream File)))
+
+(defn- check-final-path-inside-target-dir! [f target-dir entry]
+  (when-not (-> f .getCanonicalPath (.startsWith (str (.getCanonicalPath target-dir) File/separator)))
+    (throw (ex-info "Expanding entry would be created outside target dir"
+                    {:entry entry
+                     :entry-final-path f
+                     :target-dir target-dir}))))
 
 (defn unzip
   "Takes the path to a zipfile `source` and unzips it to target-dir."
@@ -16,9 +23,11 @@
   ([source target-dir]
      (with-open [zip (ZipFile. (fs/file source))]
        (let [entries (enumeration-seq (.entries zip))
+             target-dir-as-file (fs/file target-dir)
              target-file #(fs/file target-dir (str %))]
          (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
-                 :let [f (target-file entry)]]
+                 :let [^File f (target-file entry)]]
+           (check-final-path-inside-target-dir! f target-dir-as-file entry)
            (fs/mkdirs (fs/parent f))
            (io/copy (.getInputStream zip entry) f))))
      target-dir))
@@ -103,14 +112,16 @@
   ([source] (untar source (name source)))
   ([source target]
      (with-open [tin (TarArchiveInputStream. (io/input-stream (fs/file source)))]
-       (doseq [^TarArchiveEntry entry (tar-entries tin) :when (not (.isDirectory entry))
-               :let [output-file (fs/file target (.getName entry))]]
-         (fs/mkdirs (fs/parent output-file))
-         (io/copy tin output-file)
-         (when (.isFile entry)
-           (fs/chmod (apply str (take-last
-                                 3 (format "%05o" (.getMode entry))))
-                     (.getPath output-file)))))))
+       (let [target-dir-as-file (fs/file target)]
+         (doseq [^TarArchiveEntry entry (tar-entries tin) :when (not (.isDirectory entry))
+                 :let [output-file (fs/file target (.getName entry))]]
+           (check-final-path-inside-target-dir! output-file target-dir-as-file entry)
+           (fs/mkdirs (fs/parent output-file))
+           (io/copy tin output-file)
+           (when (.isFile entry)
+             (fs/chmod (apply str (take-last
+                                    3 (format "%05o" (.getMode entry))))
+                       (.getPath output-file))))))))
 
 (defn gunzip
   "Takes a path to a gzip file `source` and unzips it."
