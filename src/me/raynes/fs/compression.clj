@@ -10,7 +10,7 @@
            (java.io ByteArrayOutputStream File)))
 
 (defn- check-final-path-inside-target-dir! [f target-dir entry]
-  (when-not (-> f .getCanonicalPath (.startsWith (.getCanonicalPath target-dir)))
+  (when-not (-> f .getCanonicalPath (.startsWith (str (.getCanonicalPath target-dir) File/separator)))
     (throw (ex-info "Expanding entry would be created outside target dir"
                     {:entry entry
                      :entry-final-path f
