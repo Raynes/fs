@@ -387,12 +387,12 @@
                                                   curly-depth)
          :else (recur (next stream) (str re c) curly-depth)))))
 
-(defn glob
+(defn- glob-1
   "Returns files matching glob pattern."
   ([pattern]
      (let [parts (split pattern)
            root (apply file (if (= (count parts) 1) ["."] (butlast parts)))]
-       (glob root (last parts))))
+       (glob-1 root (last parts))))
   ([^File root pattern]
      (let [regex (glob->regex pattern)]
        (seq (.listFiles
@@ -400,6 +400,58 @@
              (reify FilenameFilter
                (accept [_ _ filename]
                  (boolean (re-find regex filename)))))))))
+
+(defn- has-wildcard?
+  "Checks if a path part has a wildcard in it."
+  [s]
+  (boolean (or (re-find #"(?<!\\)[\*\?]" s)
+               (re-find #"(?<!\\)\[[^\]]+(?<!\\)\]" s))))
+
+(defn- fix-empty-prefix
+  "If the prefix list is empty, replace it with [\".\"]"
+  [prefix]
+  (if (empty? prefix)
+    ["."]
+    prefix))
+
+(defn- find-first-pattern
+  "Finds the first part (from a list of strings) that contains a wildcard, then returns a 3-tuple of
+   [prefix, part-with-wildcard, suffix], where both prefix and suffix are lists."
+  [parts]
+  (loop [prefix []
+         part (first parts)
+         suffix (rest parts)]
+    (cond
+      (and part (has-wildcard? part))
+      [(fix-empty-prefix prefix) part suffix]
+
+      (not-empty suffix)
+      (recur (conj prefix part)
+             (first suffix)
+             (rest suffix))
+
+      :else
+      [(fix-empty-prefix prefix) part nil])))
+
+(defn glob
+  "Returns files matching glob pattern."
+  [path]
+  (loop [to-process [(find-first-pattern (split path))]
+         found []]
+    (if (empty? to-process)
+      found
+      (let [[prefix pattern suffix] (first to-process)
+            files (glob-1 (apply file prefix) pattern)]
+        (if (empty? suffix)
+          (recur (rest to-process)
+                 (concat found files))
+          (recur (concat
+                   (reduce (fn [acc f]
+                             (conj acc (find-first-pattern (concat (split (.getPath f)) suffix))))
+                           []
+                           files)
+                   (rest to-process))
+                 found))))))
 
 (defn- iterzip
   "Iterate over a zip, returns a sequence of the nodes with a nil suffix"
