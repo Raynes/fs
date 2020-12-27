@@ -51,7 +51,7 @@
 (defn ^File file
   "If `path` is a period, replaces it with cwd and creates a new File object
    out of it and `paths`. Or, if the resulting File object does not constitute
-   an absolute path, makes it absolutely by creating a new File object out of
+   an absolute path, makes it absolute by creating a new File object out of
    the `paths` and cwd."
   [path & paths]
   (when-let [path (apply
