@@ -1,11 +1,16 @@
 # fs - File system utilities for Clojure
 
-[![Build Status](https://secure.travis-ci.org/Raynes/fs.png)](http://travis-ci.org/Raynes/fs)
-
-[API docs](http://raynes.github.com/fs/)
+```clj
+[fs "1.4.7"]
+```
 
 This library defines some utilities for working with the file system in Clojure. Mostly, it wants to fill the gap that
 `clojure.java.io` leaves and add on (and prettify) what `java.io.File` provides.
+
+## pre-commit
+
+- Install: https://pre-commit.com/
+- running locally: This will also happen automatically before committing to a branch, but you can also run the tasks with `pre-commit run --all-files`
 
 ## Usage
 
@@ -21,33 +26,6 @@ This is 100% a utility library. If you have something useful that it doesn't alr
 because I probably want it. Make sure you include tests. Also, make sure they pass.
 
 fs is *not* an I/O utility library. We should try to keep things limited to file system activities.
-
-## Artifacts
-
-Library artifacts are [released to Clojars](https://clojars.org/me.raynes/fs). If you are using Maven, add the following repository
-definition to your `pom.xml`:
-
-``` xml
-<repository>
-  <id>clojars.org</id>
-  <url>http://clojars.org/repo</url>
-</repository>
-```
-
-### The Most Recent Release
-
-With Leiningen:
-
-    [me.raynes/fs "1.4.6"]
-
-
-With Maven:
-
-    <dependency>
-      <groupId>me.raynes</groupId>
-      <artifactId>fs</artifactId>
-      <version>1.4.6</version>
-    </dependency>
 
 ## License
 

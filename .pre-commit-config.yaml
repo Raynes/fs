@@ -1,0 +1,7 @@
+- repo: local
+  hooks:
+    - id: pom_generator
+      name: pom_generator
+      entry: pom_generator.sh
+      language: script
+      pass_filenames: false

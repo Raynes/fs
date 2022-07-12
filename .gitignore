@@ -2,10 +2,9 @@
 *.jar
 lib
 classes
-pom.xml
 README.html
 docs
 target
-pom.xml*
 doc
 test/me/raynes/testfiles/round*
+/.idea
