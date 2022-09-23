@@ -3,7 +3,6 @@
   (:refer-clojure :exclude [name parents])
   (:require [clojure.zip :as zip]
             [clojure.java.io :as io]
-            [clojure.string :as string]
             [clojure.java.shell :as sh])
   (:import [java.io File FilenameFilter]))
 
@@ -321,7 +320,7 @@
      (format "%s%s-%s%s" prefix (System/currentTimeMillis)
              (long (rand 0x100000000)) suffix)))
 
-(defn- temp-create
+(defn- ^File temp-create
   "Create a temporary file or dir, trying n times before giving up."
   [prefix suffix tries f]
   (let [tmp (file (tmpdir) (temp-name prefix suffix))]
@@ -381,7 +380,7 @@
          (= c \?) (recur (next stream) (str re "[^/]") curly-depth)
          (= c \{) (recur (next stream) (str re \() (inc curly-depth))
          (= c \}) (recur (next stream) (str re \)) (dec curly-depth))
-         (and (= c \,) (< 0 curly-depth)) (recur (next stream) (str re \|)
+         (and (= c \,) (pos? curly-depth)) (recur (next stream) (str re \|)
                                                  curly-depth)
          (#{\. \( \) \| \+ \^ \$ \@ \%} c) (recur (next stream) (str re \\ c)
                                                   curly-depth)
@@ -449,7 +448,7 @@
   (- (int c) 48))
 
 (defn- chmod-octal-digit
-  [f i user?]
+  [^File f i user?]
   (if (> i 7)
     (throw (IllegalArgumentException. "Bad mode"))
     (do (.setReadable f (pos? (bit-and i 4)) user?)
