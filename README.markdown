@@ -2,7 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/Raynes/fs.png)](http://travis-ci.org/Raynes/fs)
 
-[API docs](http://raynes.github.com/fs/)
+[API docs](http://raynes.github.io/fs/)
 
 This library defines some utilities for working with the file system in Clojure. Mostly, it wants to fill the gap that
 `clojure.java.io` leaves and add on (and prettify) what `java.io.File` provides.
